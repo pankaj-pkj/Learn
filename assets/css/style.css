@@ -1,0 +1,702 @@
+/* ==========================================================================
+   ZOI ICE TEA
+   Scroll-driven product site. No frameworks, no build step.
+   ========================================================================== */
+
+:root{
+  --ink:            #05070a;
+  --ink-2:          #090d13;
+  --paper:          #f2f5f8;
+  --muted:          rgba(242,245,248,.56);
+  --faint:          rgba(242,245,248,.28);
+  --line:           rgba(242,245,248,.14);
+
+  --ice:            #bfe4ff;
+  --deep:           #041d33;
+  --deep-2:         #08375f;
+  --beam:           #2f9bff;
+
+  --ember:          #ff6a1f;
+  --ember-2:        #b8390a;
+  --char:           #150802;
+
+  --shell:          clamp(20px, 4.4vw, 68px);
+  --ease:           cubic-bezier(.22,.61,.36,1);
+  --font:           'Inter', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'Segoe UI', Arial, sans-serif;
+}
+
+*,*::before,*::after{ box-sizing:border-box; }
+
+html{
+  scroll-behavior:smooth;
+  background:var(--ink);
+  -webkit-text-size-adjust:100%;
+}
+
+body{
+  margin:0;
+  font-family:var(--font);
+  font-weight:300;
+  color:var(--paper);
+  background:var(--ink);
+  overflow-x:hidden;
+  line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+
+h1,h2,h3,h4,p,ul,dl,dd,figure{ margin:0; }
+ul{ list-style:none; padding:0; }
+button{ font:inherit; color:inherit; background:none; border:0; cursor:pointer; }
+a{ color:inherit; text-decoration:none; }
+canvas{ display:block; }
+
+.eyebrow{
+  font-size:11px;
+  font-weight:500;
+  letter-spacing:.26em;
+  text-transform:uppercase;
+  color:var(--faint);
+}
+
+/* Film grain so the flat gradients never band ------------------------------ */
+.grain{
+  position:fixed;
+  inset:-50%;
+  z-index:60;
+  pointer-events:none;
+  opacity:.05;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/></filter><rect width='160' height='160' filter='url(%23n)'/></svg>");
+  animation:grain 700ms steps(2,end) infinite;
+}
+@keyframes grain{ 50%{ transform:translate(-3%,2%); } }
+
+/* ==========================================================================
+   Nav
+   ========================================================================== */
+
+.nav{
+  position:fixed;
+  inset:0 0 auto;
+  z-index:50;
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  padding:clamp(18px,2.6vw,30px) var(--shell);
+  mix-blend-mode:difference;
+}
+
+.wordmark{
+  display:grid;
+  gap:2px;
+  font-size:9px;
+  font-weight:500;
+  letter-spacing:.28em;
+  line-height:1;
+}
+
+.menu{
+  display:grid;
+  gap:5px;
+  padding:8px 0 8px 24px;
+}
+.menu span{
+  display:block;
+  width:26px;
+  height:1px;
+  background:var(--paper);
+  transition:transform .4s var(--ease);
+}
+.menu[aria-expanded="true"] span:first-child{ transform:translateY(3px) rotate(11deg); }
+.menu[aria-expanded="true"] span:last-child{  transform:translateY(-3px) rotate(-11deg); }
+
+.drawer{
+  position:fixed;
+  inset:0;
+  z-index:45;
+  display:grid;
+  align-content:center;
+  gap:8px;
+  padding:0 var(--shell);
+  background:rgba(5,7,10,.94);
+  backdrop-filter:blur(22px);
+  -webkit-backdrop-filter:blur(22px);
+  opacity:0;
+  transition:opacity .45s var(--ease);
+}
+.drawer[hidden]{ display:none; }
+.drawer.is-open{ opacity:1; }
+.drawer li a{
+  display:block;
+  padding:.12em 0;
+  font-size:clamp(30px,6.4vw,64px);
+  font-weight:200;
+  letter-spacing:-.02em;
+  color:var(--muted);
+  transition:color .3s var(--ease), transform .45s var(--ease);
+}
+.drawer li a:hover{ color:var(--paper); transform:translateX(14px); }
+.drawer__note{ margin-top:34px; font-size:12px; color:var(--faint); }
+
+/* ==========================================================================
+   Hero — the can, the ice, the shatter
+   ========================================================================== */
+
+.hero{ height:320vh; position:relative; }
+
+.hero__stage{
+  position:sticky;
+  top:0;
+  height:100vh;
+  overflow:hidden;
+  display:grid;
+  place-items:center;
+  background:
+    radial-gradient(120% 90% at 50% 38%, #12293e 0%, #081320 44%, var(--ink) 80%);
+}
+
+/* Fades in as the hero ends so the handoff into the blue reads as one move */
+.hero__wash{
+  position:absolute;
+  inset:0;
+  z-index:5;
+  opacity:0;
+  pointer-events:none;
+  background:radial-gradient(140% 110% at 50% 60%, #072943 0%, #04121f 55%, #02080f 100%);
+}
+
+.shards{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  z-index:3;
+  pointer-events:none;
+}
+
+/* Oversized headline that bleeds off both edges, exactly like the reference */
+.hero__title{
+  position:relative;
+  z-index:1;
+  grid-area:1/1;
+  font-size:clamp(72px, 17.5vw, 300px);
+  font-weight:200;
+  letter-spacing:-.045em;
+  line-height:1;
+  white-space:nowrap;
+  color:var(--paper);
+  will-change:transform, opacity;
+}
+
+.ice{
+  grid-area:1/1;
+  position:relative;
+  z-index:2;
+  width:clamp(230px, 30vw, 400px);
+  aspect-ratio:1/1.12;
+  display:grid;
+  place-items:center;
+  will-change:transform, opacity;
+}
+
+/* --- the ice block ------------------------------------------------------- */
+.ice__block{
+  position:absolute;
+  inset:0;
+  clip-path:polygon(16% 4%, 62% 0%, 92% 13%, 100% 47%, 90% 84%, 61% 100%, 24% 96%, 4% 71%, 0% 33%);
+  background:
+    linear-gradient(140deg, rgba(232,247,255,.52), rgba(158,210,246,.26) 44%, rgba(226,244,255,.46));
+  backdrop-filter:blur(2px) saturate(1.4) brightness(1.15);
+  -webkit-backdrop-filter:blur(2px) saturate(1.4) brightness(1.15);
+  box-shadow:
+    inset 0 0 70px rgba(255,255,255,.55),
+    inset 0 0 150px rgba(150,210,255,.35),
+    0 40px 120px rgba(6,40,70,.65);
+}
+.ice__face{
+  position:absolute;
+  inset:0;
+  background:
+    linear-gradient(112deg, transparent 34%, rgba(255,255,255,.42) 40%, transparent 46%),
+    linear-gradient(-64deg, transparent 58%, rgba(255,255,255,.26) 63%, transparent 68%);
+  mix-blend-mode:screen;
+}
+.ice__gloss{
+  position:absolute;
+  left:12%; top:7%;
+  width:40%; height:26%;
+  border-radius:50%;
+  background:radial-gradient(closest-side, rgba(255,255,255,.55), transparent);
+  filter:blur(6px);
+}
+.ice__crack{
+  position:absolute;
+  background:linear-gradient(to bottom, transparent, rgba(255,255,255,.65), transparent);
+  width:1px;
+  transform-origin:top center;
+  opacity:.5;
+}
+.ice__crack--a{ left:34%; top:6%;  height:52%; transform:rotate(13deg); }
+.ice__crack--b{ left:63%; top:22%; height:44%; transform:rotate(-21deg); }
+.ice__crack--c{ left:48%; top:44%; height:38%; transform:rotate(6deg); }
+
+/* --- the can ------------------------------------------------------------- */
+.can{
+  position:relative;
+  width:31%;
+  aspect-ratio:1/3.05;
+  transform:rotate(-8deg);
+  filter:drop-shadow(0 26px 40px rgba(0,0,0,.55));
+}
+.can__body{
+  position:absolute;
+  inset:6% 0 0;
+  border-radius:14px 14px 9px 9px / 10px 10px 7px 7px;
+  background:
+    linear-gradient(90deg,
+      #8e9aa6 0%, #dfe6ec 12%, #ffffff 34%, #fbfdff 52%,
+      #e4ebf1 72%, #a9b5c1 90%, #77828d 100%);
+  display:grid;
+  align-content:center;
+  justify-items:center;
+  gap:9%;
+  padding:12% 6%;
+  overflow:hidden;
+}
+.can__body::after{
+  /* wet, refracted edge where the ice meets the metal */
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(180deg, rgba(120,190,255,.22), transparent 30%, transparent 74%, rgba(10,40,70,.28));
+}
+.can__label{
+  display:grid;
+  gap:3px;
+  font-size:clamp(6px,.72vw,9px);
+  font-weight:600;
+  letter-spacing:.26em;
+  line-height:1;
+  color:#0d1319;
+  text-align:center;
+}
+.can__flavour{
+  font-size:clamp(6px,.7vw,9px);
+  font-weight:500;
+  letter-spacing:.05em;
+  color:#3f9a52;
+}
+.can__legal{
+  font-size:clamp(4px,.5vw,6px);
+  letter-spacing:.12em;
+  color:rgba(13,19,25,.45);
+}
+.can__cap{
+  position:absolute;
+  inset:0 18% auto;
+  height:8%;
+  border-radius:5px 5px 2px 2px;
+  background:linear-gradient(90deg,#6d7883,#cfd7de 38%,#f4f7fa 55%,#9aa5b0);
+}
+.can__shine{
+  position:absolute;
+  inset:6% 0 0;
+  border-radius:inherit;
+  background:linear-gradient(96deg, transparent 40%, rgba(255,255,255,.75) 47%, transparent 54%);
+  mix-blend-mode:overlay;
+  pointer-events:none;
+}
+
+/* --- hero copy ----------------------------------------------------------- */
+.hero__meta{
+  position:absolute;
+  left:var(--shell);
+  bottom:clamp(74px,9vh,110px);
+  z-index:4;
+  max-width:min(30ch,44vw);
+  display:grid;
+  gap:10px;
+  will-change:transform,opacity;
+}
+.hero__sub{ font-size:clamp(13px,1.05vw,15px); color:var(--muted); }
+
+.cue{
+  position:absolute;
+  right:var(--shell);
+  bottom:clamp(74px,9vh,110px);
+  z-index:4;
+  display:grid;
+  justify-items:center;
+  gap:12px;
+  font-size:10px;
+  letter-spacing:.3em;
+  text-transform:uppercase;
+  color:var(--faint);
+}
+.cue i{
+  width:1px;
+  height:52px;
+  background:linear-gradient(var(--faint), transparent);
+  animation:drop 2.1s var(--ease) infinite;
+}
+@keyframes drop{
+  0%   { transform:scaleY(0); transform-origin:top; }
+  55%  { transform:scaleY(1); transform-origin:top; }
+  56%  { transform:scaleY(1); transform-origin:bottom; }
+  100% { transform:scaleY(0); transform-origin:bottom; }
+}
+
+/* ==========================================================================
+   Deep — aurora, fanning gallery, flavours
+   ========================================================================== */
+
+/* Pulled up by one viewport so its sticky stage takes over exactly as the
+   hero finishes fading — otherwise the hero's last screen scrolls past empty. */
+.deep{ height:420vh; position:relative; margin-top:-100vh; }
+
+.deep__stage{
+  position:sticky;
+  top:0;
+  height:100vh;
+  overflow:hidden;
+  display:grid;
+  place-items:center;
+  background:radial-gradient(140% 110% at 50% 60%, #072943 0%, #04121f 55%, #02080f 100%);
+}
+
+.aurora{ position:absolute; inset:-25%; z-index:0; filter:blur(70px); }
+.aurora span{ position:absolute; border-radius:50%; mix-blend-mode:screen; }
+.aurora__a{
+  left:8%; top:14%; width:62%; height:66%;
+  background:radial-gradient(closest-side, rgba(28,120,206,.82), transparent 72%);
+  animation:float-a 19s ease-in-out infinite alternate;
+}
+.aurora__b{
+  right:2%; top:6%; width:58%; height:72%;
+  background:radial-gradient(closest-side, rgba(10,68,132,.78), transparent 70%);
+  animation:float-b 24s ease-in-out infinite alternate;
+}
+.aurora__c{
+  left:24%; bottom:2%; width:64%; height:56%;
+  background:radial-gradient(closest-side, rgba(52,168,255,.42), transparent 74%);
+  animation:float-a 30s ease-in-out infinite alternate-reverse;
+}
+.aurora__spark{
+  left:50%; top:48%; width:9px; height:9px;
+  transform:translate(-50%,-50%);
+  background:#eaf6ff;
+  box-shadow:0 0 26px 10px rgba(150,215,255,.75);
+  animation:pulse 3.4s ease-in-out infinite;
+}
+@keyframes float-a{ to{ transform:translate3d(9%,-7%,0) scale(1.16); } }
+@keyframes float-b{ to{ transform:translate3d(-11%,8%,0) scale(1.1); } }
+@keyframes pulse{ 50%{ opacity:.35; transform:translate(-50%,-50%) scale(.6); } }
+
+.deep__word{
+  grid-area:1/1;
+  z-index:2;
+  font-size:clamp(30px,5.4vw,78px);
+  font-weight:200;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  will-change:transform,opacity;
+}
+
+/* --- the fanning card stack --------------------------------------------- */
+.fan{
+  grid-area:1/1;
+  z-index:2;
+  position:relative;
+  width:min(1120px,92vw);
+  height:min(60vh,460px);
+  perspective:1400px;
+  will-change:opacity;
+}
+.fan__card{
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:clamp(112px,13.5vw,196px);
+  aspect-ratio:3/4.4;
+  margin:0;
+  border-radius:4px;
+  overflow:hidden;
+  background:#06121e;
+  border:1px solid rgba(190,228,255,.18);
+  box-shadow:0 30px 70px rgba(0,10,22,.6);
+  transform-style:preserve-3d;
+  will-change:transform;
+}
+.fan__card .shot{ position:absolute; inset:0; height:100%; }
+.fan__card figcaption{
+  position:absolute;
+  z-index:2;
+  inset:auto 0 0;
+  padding:26px 12px 11px;
+  font-size:9px;
+  font-weight:500;
+  letter-spacing:.2em;
+  text-transform:uppercase;
+  background:linear-gradient(transparent, rgba(2,10,18,.92));
+}
+
+/* --- flavours ------------------------------------------------------------ */
+.flavours{
+  grid-area:1/1;
+  z-index:2;
+  display:grid;
+  justify-items:center;
+  gap:20px;
+  text-align:center;
+  padding:0 var(--shell);
+  max-width:760px;
+  will-change:transform,opacity;
+}
+.teabag{
+  width:38px;
+  fill:none;
+  stroke:var(--paper);
+  stroke-width:1.6;
+  stroke-linecap:round;
+  opacity:.85;
+}
+.flavours h2{
+  font-size:clamp(38px,7.4vw,96px);
+  font-weight:200;
+  letter-spacing:-.03em;
+  line-height:1;
+}
+.flavours p{ font-size:clamp(13px,1.1vw,15px); color:var(--muted); max-width:46ch; }
+.flavours__list{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:8px;
+  margin-top:12px;
+}
+.flavours__list li{
+  display:flex;
+  align-items:baseline;
+  gap:8px;
+  padding:9px 16px;
+  border:1px solid var(--line);
+  border-radius:100px;
+  font-size:12px;
+  letter-spacing:.04em;
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+  transition:border-color .35s var(--ease), background .35s var(--ease);
+}
+.flavours__list li:hover{ border-color:rgba(190,228,255,.55); background:rgba(190,228,255,.08); }
+.flavours__list b{ font-size:9px; font-weight:500; letter-spacing:.16em; color:var(--faint); }
+
+/* ==========================================================================
+   Above — the warm half
+   ========================================================================== */
+
+.above{
+  position:relative;
+  overflow:hidden;
+  padding:clamp(110px,15vh,190px) var(--shell) clamp(90px,12vh,150px);
+  background:linear-gradient(180deg, #02080f 0%, #1b0a03 26%, var(--char) 70%, #0b0400 100%);
+}
+.above__glow{
+  position:absolute;
+  left:50%; top:12%;
+  width:130%; aspect-ratio:1/.55;
+  transform:translateX(-50%);
+  background:radial-gradient(closest-side, rgba(255,106,31,.42), rgba(184,57,10,.14) 55%, transparent 76%);
+  filter:blur(60px);
+  pointer-events:none;
+}
+
+.above__title{
+  position:relative;
+  display:grid;
+  font-size:clamp(46px,12vw,196px);
+  font-weight:200;
+  letter-spacing:-.035em;
+  line-height:.92;
+  text-align:center;
+  margin-bottom:clamp(56px,8vh,110px);
+}
+.above__title span{ display:block; }
+.above__title span:nth-child(2){ color:#ffd9c2; }
+
+.above__cards{
+  position:relative;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:clamp(14px,2vw,30px);
+  max-width:1180px;
+  margin:0 auto;
+}
+.tall{
+  position:relative;
+  border-radius:6px;
+  overflow:hidden;
+  background:#1a0c04;
+  border:1px solid rgba(255,170,120,.16);
+  will-change:transform;
+}
+.tall .shot{ aspect-ratio:3/4.3; }
+.tall__text{
+  position:absolute;
+  inset:auto 0 0;
+  padding:clamp(40px,6vw,72px) clamp(16px,1.8vw,26px) clamp(18px,2.2vw,28px);
+  background:linear-gradient(transparent, rgba(10,4,0,.9) 46%);
+}
+.tall__text h3{
+  font-size:clamp(15px,1.6vw,21px);
+  font-weight:400;
+  letter-spacing:-.01em;
+  margin-bottom:6px;
+}
+.tall__text p{ font-size:clamp(11px,.95vw,13px); color:rgba(255,235,222,.6); }
+
+.stats{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:clamp(14px,2vw,30px);
+  max-width:1180px;
+  margin:clamp(56px,8vh,104px) auto 0;
+  padding-top:clamp(30px,4vh,50px);
+  border-top:1px solid rgba(255,170,120,.16);
+}
+.stats dt{
+  font-size:clamp(26px,4.2vw,60px);
+  font-weight:200;
+  letter-spacing:-.03em;
+  line-height:1;
+}
+.stats dd{
+  margin:8px 0 0;
+  font-size:10px;
+  font-weight:500;
+  letter-spacing:.22em;
+  text-transform:uppercase;
+  color:rgba(255,235,222,.45);
+}
+
+/* ==========================================================================
+   Procedural "photography" — mesh gradients standing in for shots
+   ========================================================================== */
+
+.shot{ display:block; width:100%; position:relative; overflow:hidden; }
+.shot::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(115deg, transparent 42%, rgba(255,255,255,.13) 50%, transparent 58%);
+}
+
+.shot--1{ background:
+  radial-gradient(60% 40% at 30% 22%, rgba(180,225,255,.85), transparent 70%),
+  radial-gradient(70% 50% at 76% 78%, rgba(20,96,168,.9), transparent 72%),
+  linear-gradient(160deg,#0a2d4c,#03101d); }
+.shot--2{ background:
+  radial-gradient(50% 60% at 68% 28%, rgba(226,247,255,.9), transparent 68%),
+  radial-gradient(80% 60% at 20% 88%, rgba(11,72,132,.95), transparent 70%),
+  linear-gradient(200deg,#123f66,#020a13); }
+.shot--3{ background:
+  radial-gradient(46% 34% at 50% 46%, rgba(255,255,255,.95), transparent 66%),
+  radial-gradient(90% 70% at 50% 100%, rgba(16,88,152,.85), transparent 68%),
+  linear-gradient(180deg,#071d31,#010609); }
+.shot--4{ background:
+  radial-gradient(56% 44% at 26% 70%, rgba(126,220,180,.7), transparent 70%),
+  radial-gradient(64% 52% at 80% 24%, rgba(198,238,255,.8), transparent 70%),
+  linear-gradient(140deg,#093349,#02121b); }
+.shot--5{ background:
+  radial-gradient(58% 46% at 74% 66%, rgba(255,196,142,.6), transparent 70%),
+  radial-gradient(70% 56% at 26% 22%, rgba(96,178,240,.75), transparent 72%),
+  linear-gradient(200deg,#0b2a44,#03101c); }
+
+.shot--pour{ background:
+  radial-gradient(44% 56% at 52% 30%, rgba(255,214,160,.92), transparent 66%),
+  radial-gradient(80% 64% at 46% 96%, rgba(196,58,10,.95), transparent 70%),
+  linear-gradient(170deg,#5a1b04,#150602); }
+.shot--burst{ background:
+  radial-gradient(40% 40% at 62% 42%, rgba(255,240,214,.95), transparent 62%),
+  radial-gradient(76% 70% at 28% 82%, rgba(230,92,18,.9), transparent 70%),
+  conic-gradient(from 200deg at 62% 42%, rgba(255,140,40,.5), transparent 38%, rgba(255,90,20,.45) 72%, transparent),
+  linear-gradient(150deg,#4a1503,#120501); }
+.shot--bottle{ background:
+  linear-gradient(90deg, transparent 38%, rgba(236,246,255,.92) 43%, rgba(255,255,255,.98) 50%, rgba(206,226,242,.9) 57%, transparent 62%),
+  radial-gradient(70% 60% at 50% 84%, rgba(255,132,44,.6), transparent 72%),
+  linear-gradient(190deg,#2c1206,#0d0401); }
+
+/* ==========================================================================
+   Footer
+   ========================================================================== */
+
+.end{
+  padding:clamp(70px,10vh,120px) var(--shell) clamp(30px,5vh,54px);
+  background:var(--ink);
+  border-top:1px solid var(--line);
+}
+.end__mark{
+  font-size:clamp(84px,24vw,340px);
+  font-weight:200;
+  letter-spacing:.02em;
+  line-height:.82;
+  color:transparent;
+  -webkit-text-stroke:1px rgba(242,245,248,.2);
+}
+.end__cols{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:clamp(20px,3vw,44px);
+  margin-top:clamp(40px,6vh,74px);
+  max-width:820px;
+}
+.end__cols h4{
+  font-size:10px;
+  font-weight:500;
+  letter-spacing:.22em;
+  text-transform:uppercase;
+  color:var(--faint);
+  margin-bottom:10px;
+}
+.end__cols p{ font-size:13px; color:var(--muted); }
+.end__fine{
+  margin-top:clamp(46px,7vh,86px);
+  font-size:11px;
+  letter-spacing:.1em;
+  color:var(--faint);
+}
+
+/* ==========================================================================
+   Reveal-on-enter
+   ========================================================================== */
+
+[data-reveal]{
+  opacity:0;
+  transform:translateY(34px);
+  transition:opacity .9s var(--ease), transform .9s var(--ease);
+}
+[data-reveal].is-in{ opacity:1; transform:none; }
+
+/* ==========================================================================
+   Responsive
+   ========================================================================== */
+
+@media (max-width:900px){
+  .hero{ height:280vh; }
+  .deep{ height:360vh; }
+  .above__cards{ grid-template-columns:1fr; max-width:440px; }
+  .tall{ transform:none !important; }
+  .stats{ grid-template-columns:repeat(2,1fr); row-gap:30px; }
+  .hero__meta{ max-width:none; right:var(--shell); bottom:clamp(96px,14vh,130px); }
+  .cue{ display:none; }
+  .end__cols{ grid-template-columns:1fr; }
+}
+
+@media (max-width:560px){
+  .fan__card{ width:96px; }
+  .ice{ width:64vw; }
+}
+
+@media (prefers-reduced-motion:reduce){
+  html{ scroll-behavior:auto; }
+  .grain, .cue i, .aurora span{ animation:none; }
+  [data-reveal]{ opacity:1; transform:none; }
+}
