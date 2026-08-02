@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RAW — Ruby Pomegranate</title>
+<meta name="description" content="Cold-pressed juice, with the fruit orbiting the bottle in 3D. Arrow through three flavours.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/juice.css">
+</head>
+<body>
+
+<header class="top">
+  <a class="logo" href="index.html">
+    <span class="logo__pre">The freshest</span>
+    <span class="logo__word">Goodness</span>
+  </a>
+  <nav class="top__nav">
+    <a href="#" class="is-live">Juices</a>
+    <a href="#">Our story</a>
+    <a href="#">Health benefits</a>
+    <a href="#">Careers</a>
+  </nav>
+  <a class="order" href="#">Order now</a>
+</header>
+
+<main class="scene" data-scene>
+
+  <canvas class="swirl swirl--back" aria-hidden="true"></canvas>
+
+  <div class="bottle" data-bottle>
+    <div class="bottle__cap"></div>
+    <div class="bottle__neck"></div>
+    <div class="bottle__body">
+      <div class="bottle__juice"></div>
+      <div class="bottle__label">
+        <span class="bottle__mark">RAW</span>
+        <span class="bottle__sub">Pressery</span>
+      </div>
+      <span class="bottle__gloss"></span>
+    </div>
+    <p class="bottle__name" data-word>Pomegranate</p>
+  </div>
+
+  <canvas class="swirl swirl--front" aria-hidden="true"></canvas>
+
+  <!-- slide copy, left and right of the bottle -->
+  <div class="say say--l">
+    <h1 class="say__head" data-head-l>Ruby Pomegranate.</h1>
+    <p class="say__sub" data-sub-l>Nature's jewel.</p>
+    <p class="say__body" data-body-l>Freshly pressed pomegranate, nothing added, delivering a tart and sweet perfection.</p>
+    <p class="say__price" data-price>₹150 <i>/ 500 ml</i></p>
+  </div>
+
+  <div class="say say--r">
+    <h2 class="say__head say__head--r" data-head-r>Heart healthy goodness.</h2>
+    <p class="say__body" data-body-r>Punicalagins and anthocyanins, the two things in this fruit worth learning to pronounce.</p>
+  </div>
+
+  <button class="arrow arrow--prev" type="button" aria-label="Previous flavour">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4 7 12l8 8"/></svg>
+  </button>
+  <button class="arrow arrow--next" type="button" aria-label="Next flavour">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4l8 8-8 8"/></svg>
+  </button>
+
+  <ol class="dots" data-dots aria-label="Flavours"></ol>
+
+</main>
+
+<footer class="under">
+  <p>Drag sideways, or use the arrows — the fruit orbits the bottle in real 3D, sorted front to back.</p>
+  <p><a href="index.html">← All demos</a></p>
+</footer>
+
+<script src="assets/js/juice.js"></script>
+</body>
+</html>

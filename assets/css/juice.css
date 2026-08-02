@@ -1,0 +1,330 @@
+/* ==========================================================================
+   RAW Pressery — fruit orbiting the bottle
+   Colours are driven from JS via the --a / --b / --glow custom properties so a
+   flavour change re-tints the whole page in one place.
+   ========================================================================== */
+
+:root{
+  --a:      #d5133b;          /* flavour, bright */
+  --b:      #4a0410;          /* flavour, deep  */
+  --glow:   #ff2f57;
+  --paper:  #fff4f2;
+  --muted:  rgba(255,244,242,.62);
+  --faint:  rgba(255,244,242,.34);
+  --amber:  #ff6a15;
+  --shell:  clamp(16px, 3.4vw, 54px);
+  --ease:   cubic-bezier(.22,.61,.36,1);
+  --font:   'Inter', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'Segoe UI', Arial, sans-serif;
+}
+
+*,*::before,*::after{ box-sizing:border-box; }
+
+body{
+  margin:0;
+  font-family:var(--font);
+  font-weight:300;
+  color:var(--paper);
+  background:#12030a;
+  overflow-x:hidden;
+  line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+  transition:background .9s var(--ease);
+}
+
+h1,h2,p,ol{ margin:0; }
+ol{ list-style:none; padding:0; }
+button{ font:inherit; color:inherit; background:none; border:0; cursor:pointer; }
+a{ color:inherit; text-decoration:none; }
+canvas{ display:block; }
+
+/* ==========================================================================
+   Top bar — light, unlike the rest of the page
+   ========================================================================== */
+
+.top{
+  position:relative;
+  z-index:20;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:24px;
+  padding:14px var(--shell);
+  background:#f4eeea;
+  color:#1a0a0d;
+}
+
+.logo{ display:grid; line-height:1.05; }
+.logo__pre{ font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:rgba(26,10,13,.5); }
+.logo__word{
+  font-size:20px;
+  font-weight:700;
+  letter-spacing:-.03em;
+  background:linear-gradient(92deg,#ff6a15,#e0114a 42%,#8d1bd0);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+}
+
+.top__nav{ display:flex; gap:clamp(14px,2.2vw,34px); }
+.top__nav a{
+  font-size:11px;
+  font-weight:500;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:rgba(26,10,13,.55);
+  transition:color .3s var(--ease);
+}
+.top__nav a:hover,.top__nav a.is-live{ color:#1a0a0d; }
+
+.order{
+  padding:10px 22px;
+  border-radius:100px;
+  background:#1a0a0d;
+  color:#fff4f2;
+  font-size:10px;
+  font-weight:600;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  white-space:nowrap;
+  transition:transform .3s var(--ease);
+}
+.order:hover{ transform:translateY(-2px); }
+
+/* ==========================================================================
+   Scene
+   ========================================================================== */
+
+.scene{
+  position:relative;
+  height:calc(100vh - 58px);
+  min-height:560px;
+  overflow:hidden;
+  display:grid;
+  place-items:center;
+  background:
+    radial-gradient(58% 62% at 50% 48%, var(--b) 0%, #200208 52%, #0d0206 100%);
+  transition:background .9s var(--ease);
+  touch-action:pan-y;
+  cursor:grab;
+  user-select:none;
+}
+.scene.is-dragging{ cursor:grabbing; }
+
+.swirl{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  pointer-events:none;
+}
+.swirl--back{ z-index:1; }
+.swirl--front{ z-index:3; }
+
+/* --- the bottle ---------------------------------------------------------- */
+
+.bottle{
+  position:relative;
+  z-index:2;
+  display:grid;
+  justify-items:center;
+  width:clamp(86px,10vw,132px);
+  filter:drop-shadow(0 34px 46px rgba(0,0,0,.6));
+  will-change:transform;
+}
+.bottle__cap{
+  width:52%;
+  height:clamp(15px,1.9vh,22px);
+  border-radius:4px 4px 2px 2px;
+  background:linear-gradient(90deg,#b9b2ad,#fbf8f6 42%,#efe9e5 58%,#a49c97);
+}
+.bottle__neck{
+  width:40%;
+  height:clamp(12px,1.6vh,20px);
+  background:linear-gradient(90deg,rgba(255,255,255,.16),rgba(255,255,255,.5) 45%,rgba(255,255,255,.12));
+}
+.bottle__body{
+  position:relative;
+  width:100%;
+  height:clamp(210px,32vh,320px);
+  margin-top:-2px;
+  border-radius:16px 16px 12px 12px;
+  overflow:hidden;
+  background:linear-gradient(90deg,
+    rgba(255,255,255,.10) 0%, rgba(255,255,255,.30) 16%,
+    rgba(255,255,255,.10) 44%, rgba(255,255,255,.26) 74%, rgba(255,255,255,.06) 100%);
+  border:1px solid rgba(255,255,255,.20);
+}
+.bottle__juice{
+  position:absolute;
+  inset:9% 4% 3%;
+  border-radius:10px;
+  background:linear-gradient(180deg, var(--a), var(--b) 78%);
+  box-shadow:inset 0 12px 26px rgba(255,255,255,.22), inset 0 -20px 30px rgba(0,0,0,.45);
+  transition:background .9s var(--ease);
+}
+.bottle__label{
+  position:absolute;
+  left:50%;
+  top:44%;
+  transform:translate(-50%,-50%);
+  display:grid;
+  justify-items:center;
+  gap:1px;
+  padding:9px 12px;
+  border-radius:50%;
+  width:76%;
+  aspect-ratio:1;
+  place-content:center;
+  background:#120609;
+}
+.bottle__mark{ font-size:clamp(13px,1.5vw,19px); font-weight:700; letter-spacing:-.02em; line-height:1; }
+.bottle__sub{ font-size:6px; font-weight:500; letter-spacing:.28em; text-transform:uppercase; color:var(--faint); }
+.bottle__gloss{
+  position:absolute;
+  inset:0;
+  background:linear-gradient(97deg, transparent 30%, rgba(255,255,255,.5) 38%, transparent 45%);
+  mix-blend-mode:screen;
+}
+.bottle__name{
+  margin-top:12px;
+  font-size:9px;
+  font-weight:600;
+  letter-spacing:.34em;
+  text-transform:uppercase;
+  color:var(--faint);
+}
+
+/* --- slide copy ---------------------------------------------------------- */
+
+.say{
+  position:absolute;
+  z-index:4;
+  top:50%;
+  transform:translateY(-50%);
+  max-width:min(30ch,30vw);
+  pointer-events:none;
+}
+.say--l{ left:calc(var(--shell) + clamp(38px,3.6vw,56px)); }
+.say--r{ right:calc(var(--shell) + clamp(38px,3.6vw,56px)); text-align:right; }
+
+.say__head{
+  font-size:clamp(26px,3.6vw,54px);
+  font-weight:500;
+  letter-spacing:-.035em;
+  line-height:1.02;
+}
+.say__sub{
+  margin-top:6px;
+  font-size:clamp(15px,1.7vw,24px);
+  font-weight:200;
+  font-style:italic;
+  color:var(--muted);
+}
+.say__body{
+  margin-top:16px;
+  font-size:clamp(11px,.92vw,13px);
+  color:var(--muted);
+}
+.say__price{
+  margin-top:20px;
+  font-size:clamp(16px,1.5vw,21px);
+  font-weight:500;
+}
+.say__price i{ font-style:normal; font-size:.55em; letter-spacing:.1em; color:var(--faint); }
+
+/* the swap animation, toggled from JS */
+[data-head-l],[data-sub-l],[data-body-l],[data-price],
+[data-head-r],[data-body-r],[data-word]{
+  display:block;
+  transition:opacity .34s var(--ease), transform .34s var(--ease);
+}
+.say.is-out [data-head-l],.say.is-out [data-sub-l],
+.say.is-out [data-body-l],.say.is-out [data-price],
+.say.is-out [data-head-r],.say.is-out [data-body-r]{
+  opacity:0;
+  transform:translateY(14px);
+}
+.bottle.is-out [data-word]{ opacity:0; transform:translateY(10px); }
+
+/* --- arrows and dots ----------------------------------------------------- */
+
+.arrow{
+  position:absolute;
+  z-index:6;
+  top:50%;
+  transform:translateY(-50%);
+  display:grid;
+  place-items:center;
+  width:clamp(34px,3.2vw,46px);
+  aspect-ratio:1;
+  border-radius:50%;
+  background:var(--amber);
+  color:#180600;
+  transition:transform .3s var(--ease), box-shadow .3s var(--ease);
+}
+.arrow svg{ width:42%; fill:none; stroke:currentColor; stroke-width:2.4; stroke-linecap:round; stroke-linejoin:round; }
+.arrow:hover{ transform:translateY(-50%) scale(1.09); box-shadow:0 10px 30px rgba(255,106,21,.4); }
+.arrow--prev{ left:clamp(8px,1.4vw,22px); }
+.arrow--next{ right:clamp(8px,1.4vw,22px); }
+
+.dots{
+  position:absolute;
+  z-index:6;
+  left:50%;
+  bottom:clamp(16px,3vh,32px);
+  transform:translateX(-50%);
+  display:flex;
+  gap:9px;
+}
+.dots button{
+  width:26px;
+  height:2px;
+  border-radius:2px;
+  background:rgba(255,244,242,.24);
+  transition:background .4s var(--ease), width .4s var(--ease);
+}
+.dots button.is-live{ background:var(--paper); width:44px; }
+
+/* ==========================================================================
+   Under
+   ========================================================================== */
+
+.under{
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+  justify-content:space-between;
+  padding:22px var(--shell);
+  background:#0d0206;
+  font-size:11px;
+  letter-spacing:.05em;
+  color:var(--faint);
+}
+.under a:hover{ color:var(--paper); }
+
+/* ==========================================================================
+   Responsive — stack the copy above and below on small screens
+   ========================================================================== */
+
+@media (max-width:900px){
+  .top__nav{ display:none; }
+  .scene{ height:auto; min-height:0; padding:86px 0 96px; }
+  .say{
+    position:static;
+    transform:none;
+    max-width:none;
+    text-align:center;
+    padding:0 clamp(46px,13vw,80px);
+  }
+  .say--l{ order:-1; margin-bottom:24px; }
+  .say--r{ text-align:center; margin-top:26px; }
+  .scene{ display:grid; justify-items:center; }
+  .swirl{ position:absolute; }
+  .arrow{ top:auto; bottom:34px; transform:none; }
+  .arrow:hover{ transform:scale(1.09); }
+  .dots{ bottom:12px; }
+}
+
+@media (prefers-reduced-motion:reduce){
+  .bottle,.say,.dots button{ transition:none; }
+}

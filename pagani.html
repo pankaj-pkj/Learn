@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ASTREA GT-R — Drag to rotate</title>
+<meta name="description" content="A scroll-and-drag 3D car configurator: rotate the car with a swipe, scroll to open it apart and read the engine.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/car.css">
+</head>
+<body>
+
+<header class="bar">
+  <a class="brand" href="index.html">
+    <svg viewBox="0 0 24 20" aria-hidden="true"><path d="M12 1 23 19H1z"/></svg>
+    <span>ASTREA</span>
+  </a>
+  <nav class="bar__nav">
+    <a href="#s-design" data-jump="1">Design</a>
+    <a href="#s-engine" data-jump="2">Engine</a>
+    <a href="#s-spec"   data-jump="3">Spec</a>
+  </nav>
+  <a class="cta" href="#s-spec">Enquire now</a>
+</header>
+
+<!-- one canvas, sticky for the whole story -->
+<div class="stage">
+  <canvas id="car"></canvas>
+  <p class="loading" data-loading>Loading model<span>.</span><span>.</span><span>.</span></p>
+  <p class="hint" data-hint>Drag to rotate</p>
+</div>
+
+<main class="story">
+
+  <section class="beat" id="s-hero">
+    <p class="price">€ 1.520.000</p>
+    <div class="beat__copy">
+      <p class="eyebrow">The apex predator — 1 of 15</p>
+      <h1 class="display">Astrea<br>GT&#8209;R</h1>
+      <p class="lede">Carbon-titanium monocoque, no driver aids, no apology. Built to be driven, not stored.</p>
+    </div>
+  </section>
+
+  <section class="beat" id="s-design">
+    <div class="beat__copy">
+      <p class="eyebrow">A new generation of cars styled by air</p>
+      <h2 class="display">Design</h2>
+      <p class="lede">Every panel lifts away from a single load-bearing tub. Nothing bolted on that the airflow did not ask for.</p>
+    </div>
+  </section>
+
+  <section class="beat" id="s-engine">
+    <div class="beat__copy">
+      <p class="eyebrow">Grown in Verrucchio, flat-plane crank</p>
+      <h2 class="display">Engine</h2>
+      <p class="lede">A naturally aspirated V12 sitting behind the cabin, dry-sumped and hand assembled by one person start to finish.</p>
+    </div>
+    <dl class="specs" data-specs>
+      <div><dt>V12</dt><dd>Layout</dd></div>
+      <div><dt>5987<i>cc</i></dt><dd>Displacement</dd></div>
+      <div><dt>375<i>km/h</i></dt><dd>Top speed</dd></div>
+      <div><dt>551<i>kW</i></dt><dd>Output</dd></div>
+    </dl>
+  </section>
+
+  <section class="beat" id="s-spec">
+    <div class="beat__copy beat__copy--wide">
+      <p class="eyebrow">Registrations of interest</p>
+      <h2 class="display">Yours,<br>eventually.</h2>
+      <p class="lede">Fifteen cars. Allocation by invitation. Leave a number and someone will decide whether to call it.</p>
+      <a class="cta cta--big" href="#s-hero">Request allocation</a>
+    </div>
+  </section>
+
+</main>
+
+<footer class="foot">
+  <p>Fictional marque, real technique — drag-to-rotate and scroll-driven explode on a glTF model.</p>
+  <p><a href="index.html">← All demos</a></p>
+</footer>
+
+<script src="assets/vendor/three.min.js"></script>
+<script src="assets/vendor/RoomEnvironment.js"></script>
+<script src="assets/vendor/DRACOLoader.js"></script>
+<script src="assets/vendor/GLTFLoader.js"></script>
+<script src="assets/js/car.js"></script>
+</body>
+</html>
