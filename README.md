@@ -1,60 +1,96 @@
-# ZOI ICE TEA — scroll-driven product site
+# Animation studies
 
-A UI built from the two reference videos in this repo (`2_5438654676755063948.mp4`,
-`2_5438654676755063949.mp4`). The second video shows a complete beverage site, so that
-one is rebuilt here end to end.
+Three scroll- and drag-driven pages rebuilt from the reference videos in this repo
+(`2_5438654676755063948.mp4`, `2_5438654676755063949.mp4`). No framework, no build
+step, no `npm install`.
 
-Open `index.html` in a browser. No build step, no dependencies, no npm install.
+Open `index.html` for the index of all three.
 
-## What's in it
-
-| Section | What happens |
+| Page | Technique |
 | --- | --- |
-| Hero | Oversized `Drink. Freeze.` headline bleeding off both edges, a can frozen inside a translucent ice block. Scrolling shatters the ice into ~58 procedural glass shards drawn on canvas, then washes into the blue. |
-| Experience | Animated aurora field. A deck of five cards fans open in 3D, holds, then re-stacks. |
-| Unique Flavors | Tea-bag mark, display heading, five flavour pills. |
-| A Taste Above The Rest | Warm ember half. Three portrait cards on independent parallax, then a stat row. |
-| Footer | Outlined `ZOI` wordmark, three contact columns. |
+| `ice-tea.html` | Scroll-scrubbed Canvas 2D. A can frozen in ice shatters into 58 procedural glass shards, a card deck fans open in 3D, an aurora field, a warm parallax closer. |
+| `pagani.html` | Real 3D. A glTF model on a sticky canvas — swipe to spin it with inertia, scroll to walk the camera around and lift all 51 panels apart, then reassemble. |
+| `juice.html` | Hand-projected particles. 540 bits on a tilted ring, depth-sorted into two canvases so the juice orbits *around* the bottle instead of sitting on top of it. |
 
-## How the motion works
+## Running them
 
-Everything is **scrubbed from scroll position**, not played on a timer:
+`ice-tea.html` and `juice.html` open straight from the file system — double-click and
+they run.
 
-- `trackProgress(el)` turns a tall section into a `0 → 1` value based on how far its
-  sticky stage has travelled.
-- `phase(p, a, b)` remaps a slice of that into its own `0 → 1`, and `window01(...)`
-  makes a fade-in / hold / fade-out envelope.
-- Each frame runs once inside a `requestAnimationFrame`, guarded by a `ticking` flag.
+`pagani.html` loads a `.glb`, and browsers block that over `file://` for CORS reasons.
+From this folder:
 
-Because nothing is time-based, every animation plays backwards correctly when you
-scroll up, and it can never drift out of sync with the page.
-
-The ice shatter is a canvas pass: each shard is a 3–5 sided polygon with its own start
-radius, travel distance, spin, depth and stagger, composited with `lighter` so the
-shards read as glass catching light.
-
-`.deep` carries `margin-top:-100vh` so its sticky stage takes over exactly as the hero
-finishes fading — without it the hero's last screen scrolls past empty.
-
-## Files
-
-```
-index.html
-assets/css/style.css
-assets/js/main.js
+```bash
+python3 -m http.server
+# then open http://localhost:8000/pagani.html
 ```
 
-## Notes
+The page detects `file://` and tells you this on screen rather than failing silently.
 
-- Card imagery is procedural (layered CSS mesh gradients) since the repo ships no
-  photography. Swapping in real shots means replacing the `.shot--*` rules with
-  `background-image` — nothing else changes.
-- Inter is loaded from Google Fonts and falls back to a system stack offline.
-- Honours `prefers-reduced-motion`; idle loops stop and reveals resolve immediately.
-- Layout is checked at 1440px and 390px, with no horizontal overflow at either.
+## The one idea worth stealing
 
-## The other reference
+All three drive animation from **a value you already have** — scroll position, drag
+distance — instead of from a timer:
 
-The first video shows three more concepts — an exploded luxury watch, a Pagani Zonda R
-page (black with a single yellow accent), and a pomegranate drink carousel. None of
-those are built yet.
+```js
+function trackProgress(el) {                 // 0 → 1 across a tall section
+  var r = el.getBoundingClientRect();
+  var travel = r.height - window.innerHeight;
+  return travel <= 0 ? 0 : clamp(-r.top / travel, 0, 1);
+}
+
+function phase(p, a, b) {                    // remap a slice of it to 0 → 1
+  return clamp((p - a) / (b - a), 0, 1);
+}
+```
+
+Every animation is then a pure function of `p`. Nothing is queued, nothing is
+`setTimeout`-ed, so scrolling up plays it backwards exactly and it can never drift out
+of sync. One `requestAnimationFrame` per page does all the writing, guarded by a
+`ticking` flag so a fast scroll cannot queue up frames.
+
+## Swapping in your own assets
+
+**3D model** — replace `assets/models/car.glb` (or point `MODEL_URL` at the top of
+`assets/js/car.js` somewhere else). Nothing is hard-coded to this car:
+
+- it is auto-centred and scaled to fit, whatever size it was exported at
+- the explode is computed from each mesh's own bounding-box centre, so any model
+  comes apart sensibly with no per-part naming
+- the `paint()` function is only there because the sample car ships with untextured
+  panels. If your model already has materials, delete that function
+
+If your `.glb` is Draco-compressed (most web-optimised ones are), the decoder is
+already vendored in `assets/vendor/draco/`.
+
+**Photography** — the flat imagery on `ice-tea.html` is layered CSS mesh gradients, the
+`.shot--*` rules. Replace them with `background-image` and nothing else changes.
+
+### Where to get assets, free
+
+| What | Where | Licence to check |
+| --- | --- | --- |
+| 3D models (.glb) | [Sketchfab](https://sketchfab.com/features/free-3d-models) — filter Downloadable + CC | CC-BY usually needs credit |
+| 3D models, curated | [Poly Haven](https://polyhaven.com/models), [Quaternius](https://quaternius.com) | CC0 — no attribution needed |
+| glTF test models | [KhronosGroup/glTF-Sample-Assets](https://github.com/KhronosGroup/glTF-Sample-Assets) | mixed, listed per model |
+| Photos | [Unsplash](https://unsplash.com), [Pexels](https://pexels.com), [Pixabay](https://pixabay.com) | free commercial use |
+| Product cut-outs (PNG) | [PNGimg](https://pngimg.com), [CleanPNG](https://cleanpng.com) | check per image |
+| Icons | [Lucide](https://lucide.dev), [Phosphor](https://phosphoricons.com) | MIT |
+| Fonts | [Google Fonts](https://fonts.google.com), [Fontshare](https://fontshare.com) | free commercial use |
+
+Optimise a heavy `.glb` before shipping it — `npx gltf-transform optimize in.glb out.glb`
+usually takes a model to a fraction of its size.
+
+## Vendored dependencies
+
+`assets/vendor/` holds three.js r147 (the UMD build, so no import maps or module server
+needed), its `GLTFLoader`, `DRACOLoader` and the Draco decoder. All from
+[mrdoob/three.js](https://github.com/mrdoob/three.js), MIT.
+
+## Credits and naming
+
+The car model is three.js's own Ferrari 458 sample asset, used here as a stand-in — it
+still carries its original badges. The page around it is a fictional marque ("Astrea"),
+and so are "ZOI" and "RAW Pressery", deliberately: these are technique studies, not
+copies of anyone's brand. Swap the model and the names before any of this goes near a
+real site.

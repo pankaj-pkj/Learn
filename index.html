@@ -3,158 +3,71 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ZOI ICE TEA — Drink. Freeze.</title>
-<meta name="description" content="ZOI Ice Tea — brewed cold, frozen solid, poured perfect. Five exquisite flavours crafted from the finest natural leaves.">
+<title>Animation studies — three scroll-driven pages</title>
+<meta name="description" content="Three dependency-free web animation studies rebuilt from reference videos: scroll-scrubbed canvas, a drag-to-rotate 3D model, and a hand-projected particle orbit.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/style.css">
+<link rel="stylesheet" href="assets/css/hub.css">
 </head>
 <body>
 
-<div class="grain" aria-hidden="true"></div>
-
-<header class="nav">
-  <a href="#top" class="wordmark" aria-label="ZOI Ice Tea, home">
-    <span>Z O I</span><span>I C E</span><span>T E A</span>
-  </a>
-  <button class="menu" type="button" aria-label="Open menu" aria-expanded="false">
-    <span></span><span></span>
-  </button>
+<header class="head">
+  <p class="eyebrow">Animation studies</p>
+  <h1>Three pages,<br>three techniques.</h1>
+  <p class="intro">Rebuilt from the reference videos in this repo. No framework, no build step, no npm install — open a file and it runs. Each one isolates a different way of moving things on a page, so you can lift the part you need.</p>
 </header>
 
-<nav class="drawer" hidden>
-  <ul>
-    <li><a href="#hero">Drink. Freeze.</a></li>
-    <li><a href="#deep">The Experience</a></li>
-    <li><a href="#flavours">Unique Flavours</a></li>
-    <li><a href="#above">A Taste Above</a></li>
-    <li><a href="#end">Stockists</a></li>
-  </ul>
-  <p class="drawer__note">Brewed cold in small batches. Frozen at&nbsp;−18°C.</p>
-</nav>
+<main class="deck">
 
-<main id="top">
-
-  <!-- ─────────────  HERO : can frozen in ice, shatters on scroll  ───────────── -->
-  <section class="hero" id="hero">
-    <div class="hero__stage">
-      <canvas class="shards" aria-hidden="true"></canvas>
-
-      <h1 class="hero__title" data-hero="title">Drink.&nbsp;Freeze.</h1>
-
-      <div class="ice" data-hero="ice">
-        <div class="ice__block">
-          <span class="ice__face"></span>
-          <span class="ice__gloss"></span>
-          <span class="ice__crack ice__crack--a"></span>
-          <span class="ice__crack ice__crack--b"></span>
-          <span class="ice__crack ice__crack--c"></span>
-        </div>
-        <div class="can">
-          <div class="can__body">
-            <div class="can__label">
-              <span>Z O I</span><span>I C E</span><span>T E A</span>
-            </div>
-            <p class="can__flavour">Lime Mint</p>
-            <p class="can__legal">Cold brewed · 330 ml</p>
-          </div>
-          <div class="can__cap"></div>
-          <div class="can__shine"></div>
-        </div>
-      </div>
-
-      <div class="hero__meta" data-hero="meta">
-        <p class="eyebrow">Est. 2019 — Cold brewed, never heated</p>
-        <p class="hero__sub">Sealed at the moment of freezing, so the first sip tastes like the first hour.</p>
-      </div>
-
-      <div class="cue" data-hero="cue"><span>Scroll</span><i></i></div>
-      <div class="hero__wash" data-hero="wash" aria-hidden="true"></div>
+  <a class="card card--ice" href="ice-tea.html">
+    <span class="card__art card__art--ice" aria-hidden="true">
+      <i></i><i></i><i></i>
+    </span>
+    <div class="card__body">
+      <p class="card__kicker">01 — Scroll-scrubbed canvas</p>
+      <h2>ZOI Ice Tea</h2>
+      <p class="card__note">A can frozen in ice shatters into 58 procedural glass shards as you scroll, then a deck of cards fans open in 3D. Every value is read from scroll position, so it plays backwards correctly.</p>
+      <p class="card__tech">Canvas 2D · sticky sections · zero dependencies</p>
     </div>
-  </section>
+  </a>
 
-  <!-- ─────────────  DEEP : aurora, fanning gallery, unique flavours  ───────────── -->
-  <section class="deep" id="deep">
-    <div class="deep__stage">
-      <div class="aurora" aria-hidden="true">
-        <span class="aurora__a"></span>
-        <span class="aurora__b"></span>
-        <span class="aurora__c"></span>
-        <span class="aurora__spark"></span>
-      </div>
-
-      <p class="deep__word" data-deep="word">Experience</p>
-
-      <div class="fan" data-deep="fan">
-        <figure class="fan__card" style="--i:-2"><span class="shot shot--1"></span><figcaption>First pour</figcaption></figure>
-        <figure class="fan__card" style="--i:-1"><span class="shot shot--2"></span><figcaption>Glacier run</figcaption></figure>
-        <figure class="fan__card" style="--i:0"><span class="shot shot--3"></span><figcaption>The block</figcaption></figure>
-        <figure class="fan__card" style="--i:1"><span class="shot shot--4"></span><figcaption>Leaf & frost</figcaption></figure>
-        <figure class="fan__card" style="--i:2"><span class="shot shot--5"></span><figcaption>Last light</figcaption></figure>
-      </div>
-
-      <div class="flavours" id="flavours" data-deep="flavours">
-        <svg class="teabag" viewBox="0 0 44 66" aria-hidden="true">
-          <path d="M22 2v18" /><rect x="9" y="20" width="26" height="34" rx="3" /><path d="M22 27v20M15 34h14" />
-        </svg>
-        <h2>Unique Flavors</h2>
-        <p>Explore our five exquisite tea flavours, each expertly crafted from the finest natural ingredients around the globe.</p>
-        <ul class="flavours__list">
-          <li><b>01</b> Lime&nbsp;Mint</li>
-          <li><b>02</b> Peach&nbsp;Oolong</li>
-          <li><b>03</b> Yuzu&nbsp;White</li>
-          <li><b>04</b> Blood&nbsp;Orange</li>
-          <li><b>05</b> Jasmine&nbsp;Pearl</li>
-        </ul>
-      </div>
+  <a class="card card--car" href="pagani.html">
+    <span class="card__art card__art--car" aria-hidden="true">
+      <i></i><i></i>
+    </span>
+    <div class="card__body">
+      <p class="card__kicker">02 — Real 3D, drag to rotate</p>
+      <h2>Astrea GT&#8209;R</h2>
+      <p class="card__note">A glTF model on a sticky canvas. Swipe spins it with inertia, scrolling walks the camera around and lifts all 51 panels apart, then puts them back. Swap in your own .glb and it still works.</p>
+      <p class="card__tech">three.js · glTF + Draco · needs a local server</p>
     </div>
-  </section>
+  </a>
 
-  <!-- ─────────────  ABOVE : warm section, three portrait cards  ───────────── -->
-  <section class="above" id="above">
-    <div class="above__glow" aria-hidden="true"></div>
-
-    <h2 class="above__title" data-reveal>
-      <span>A Taste</span><span>Above</span><span>The Rest</span>
-    </h2>
-
-    <div class="above__cards">
-      <article class="tall" data-parallax="0.10" data-reveal>
-        <span class="shot shot--pour"></span>
-        <div class="tall__text"><h3>The pour</h3><p>Steeped twelve hours, dropped to freezing in ninety seconds.</p></div>
-      </article>
-      <article class="tall" data-parallax="0.22" data-reveal>
-        <span class="shot shot--burst"></span>
-        <div class="tall__text"><h3>Smoothness &amp; aftertaste</h3><p>No concentrate, no reheat. Only leaf, water and cold.</p></div>
-      </article>
-      <article class="tall" data-parallax="0.10" data-reveal>
-        <span class="shot shot--bottle"></span>
-        <div class="tall__text"><h3>The bottle</h3><p>Double-walled, so the last mouthful is as cold as the first.</p></div>
-      </article>
+  <a class="card card--juice" href="juice.html">
+    <span class="card__art card__art--juice" aria-hidden="true">
+      <i></i><i></i><i></i><i></i>
+    </span>
+    <div class="card__body">
+      <p class="card__kicker">03 — Hand-projected particles</p>
+      <h2>RAW Pressery</h2>
+      <p class="card__note">540 particles on a tilted ring, projected by hand and depth-sorted into two canvases — one behind the bottle, one in front. That split is what makes the juice orbit rather than sit on top.</p>
+      <p class="card__tech">Canvas 2D · painter's algorithm · zero dependencies</p>
     </div>
-
-    <dl class="stats" data-reveal>
-      <div><dt>−18°C</dt><dd>Flash freeze</dd></div>
-      <div><dt>12 h</dt><dd>Cold steep</dd></div>
-      <div><dt>0 g</dt><dd>Added sugar</dd></div>
-      <div><dt>05</dt><dd>Flavours</dd></div>
-    </dl>
-  </section>
-
-  <!-- ─────────────  END  ───────────── -->
-  <footer class="end" id="end">
-    <p class="end__mark">ZOI</p>
-    <div class="end__cols">
-      <div><h4>Find us</h4><p>Selected grocers, cold aisle.<br>London · Lisbon · Kyoto</p></div>
-      <div><h4>Say hello</h4><p>hello@zoi.tea<br>+44 20 7946 0110</p></div>
-      <div><h4>Follow</h4><p>Instagram<br>Not much else</p></div>
-    </div>
-    <p class="end__fine">© <span data-year></span> ZOI Ice Tea — Drink. Freeze.</p>
-  </footer>
+  </a>
 
 </main>
 
-<script src="assets/js/main.js"></script>
+<footer class="foot">
+  <div>
+    <h3>Running these</h3>
+    <p>Pages 01 and 03 open straight from the file system. Page 02 loads a <code>.glb</code>, which browsers block over <code>file://</code> — from this folder run <code>python3 -m http.server</code> and open <code>localhost:8000</code>.</p>
+  </div>
+  <div>
+    <h3>Swapping the assets</h3>
+    <p>The 3D model is <code>assets/models/car.glb</code>. The flat "photography" is CSS mesh gradients — the <code>.shot--*</code> rules — so replacing them with real images changes nothing else.</p>
+  </div>
+</footer>
+
 </body>
 </html>
