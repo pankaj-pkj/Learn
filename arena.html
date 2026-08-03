@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Arena — loot crate &amp; rifle, built in code</title>
+<meta name="description" content="A loot crate that opens and a rifle that reloads, both modelled procedurally in three.js — no downloaded model, no licence, a fraction of the weight.">
+<link rel="stylesheet" href="assets/css/arena.css">
+</head>
+<body>
+
+<header class="bar">
+  <a class="brand" href="index.html"><i></i> ARENA</a>
+  <a class="back" href="index.html">← All demos</a>
+</header>
+
+<div class="stage">
+  <canvas id="gl"></canvas>
+  <p class="hint" data-hint>Drag to rotate</p>
+</div>
+
+<main class="story">
+
+  <section class="beat" id="b0">
+    <div class="copy" data-copy>
+      <p class="tag">Built in code — no model file</p>
+      <h1 class="head">Kholo<br><em>apna</em> crate</h1>
+      <p class="sub">Har cheez yahan three.js geometry se bani hai. Koi <code>.glb</code> download nahi, koi licence nahi — poora page 2.6 MB ki jagah kuch KB ka hai.</p>
+    </div>
+  </section>
+
+  <section class="beat beat--mid" id="b1">
+    <div class="copy" data-copy>
+      <p class="tag">Scroll — crate khulta hai</p>
+      <h2 class="head">Chaar panel,<br>ek <em>burst</em></h2>
+      <p class="sub">Panel bahar girte hain, dhakkan hinge par ghoomta hai, andar ki roshni tez hoti hai aur reward upar uchhalte hain.</p>
+    </div>
+    <div class="loot" data-loot>
+      <div><b class="r1">₹25</b><span>Common</span></div>
+      <div><b class="r2">₹120</b><span>Rare</span></div>
+      <div><b class="r3">₹850</b><span>Epic</span></div>
+      <div><b class="r4">₹18,500</b><span>Legendary</span></div>
+    </div>
+  </section>
+
+  <section class="beat" id="b2">
+    <div class="copy" data-copy>
+      <p class="tag">Wahi reload, ab asli 3D mein</p>
+      <h2 class="head">Mag out.<br>Mag in. <em>Ready.</em></h2>
+      <p class="sub">Rifle ke saare hisse alag mesh hain, isliye har phase apne parts hilata hai — jaise SVG wale mein hota tha, bas ab dhaatu par asli roshni padti hai.</p>
+    </div>
+  </section>
+
+  <section class="beat beat--mid" id="b3">
+    <div class="copy" data-copy>
+      <p class="phase"><i></i> Phase <b data-phase>01 · MAG OUT</b></p>
+      <h2 class="head">Teen <em>step</em></h2>
+      <p class="sub">Magazine girta hai, naya chadhta hai, charging handle peechhe-aage jaata hai aur goli chalti hai. Sab scroll se — time se nahi.</p>
+      <ol class="steps" data-steps>
+        <li>01 · Mag out</li>
+        <li>02 · Mag in</li>
+        <li>03 · Charge &amp; fire</li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="beat" id="b4">
+    <div class="copy" data-copy>
+      <p class="tag">Yahi cheez aapki site par</p>
+      <h2 class="head">~15 KB,<br><em>2.5 MB</em> nahi</h2>
+      <p class="sub">Model file na hone ka matlab: koi extra request nahi, koi CORS jhanjhat nahi, phone par turant chalta hai, aur licence ka koi risk nahi.</p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="foot">
+  <p>Loot crate aur rifle — dono three.js geometry se, koi downloaded asset nahi.</p>
+  <p><a href="index.html">← All demos</a></p>
+</footer>
+
+<script src="assets/vendor/three.min.js"></script>
+<script src="assets/vendor/RoomEnvironment.js"></script>
+<script src="assets/js/arena.js"></script>
+</body>
+</html>
