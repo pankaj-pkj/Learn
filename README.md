@@ -10,6 +10,7 @@ Open `index.html` for the index of all three.
 | --- | --- |
 | `ice-tea.html` | Scroll-scrubbed Canvas 2D. A can frozen in ice shatters into 58 procedural glass shards, a card deck fans open in 3D, an aurora field, a warm parallax closer. |
 | `pagani.html` | Real 3D. A glTF model on a sticky canvas — swipe to spin it with inertia, scroll to walk the camera around and lift all 51 panels apart, then reassemble. |
+| `arena.html` | 3D with **no model file**. A loot crate hinges open on four panels and a rifle runs a full reload — all three.js primitives, ~15 KB of geometry instead of 2.5 MB of asset. |
 | `juice.html` | Hand-projected particles. 540 bits on a tilted ring, depth-sorted into two canvases so the juice orbits *around* the bottle instead of sitting on top of it. |
 
 ## Running them
@@ -80,6 +81,26 @@ already vendored in `assets/vendor/draco/`.
 
 Optimise a heavy `.glb` before shipping it — `npx gltf-transform optimize in.glb out.glb`
 usually takes a model to a fraction of its size.
+
+### …or model it in code instead
+
+`arena.html` takes the other route, and for a real product site it is usually the better
+one:
+
+| | Downloaded model (`pagani.html`) | Modelled in code (`arena.html`) |
+| --- | --- | --- |
+| Payload | 2.6 MB (three.js + loaders + Draco + `.glb`) | ~0.6 MB, all of it three.js |
+| Extra requests | 5 | 0 |
+| Works over `file://` | no — browsers block the `.glb` | yes |
+| Licence | whatever the model carries | none, it's your code |
+| Editing it | back to Blender | change a number |
+
+Primitives get you further than they sound like they should: a crate is boxes on hinge
+groups, a rifle is boxes and cylinders. The payoff is that each part stays a named mesh,
+so a reload sequence drives real objects rather than a baked animation.
+
+Watch the licence on "free" models — the popular Khronos `DamagedHelmet`, for one,
+carries a **CC BY-NC** component, so it cannot go on a commercial site.
 
 ## Vendored dependencies
 

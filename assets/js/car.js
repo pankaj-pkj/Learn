@@ -253,6 +253,13 @@
   var camHeightNow = 0.75;
   var distNow      = 6.10;
 
+  /* A fixed camera distance only frames correctly on a wide screen. The car is
+     wide and short, so on a portrait phone the horizontal field of view is the
+     binding constraint — pull back by however much narrower the viewport is. */
+  function fitScale() {
+    return camera.aspect >= 1.6 ? 1 : Math.min(2.2, 1.6 / Math.max(camera.aspect, 0.4));
+  }
+
   function frame() {
     requestAnimationFrame(frame);
     if (!ready) { renderer.render(scene, camera); return; }
@@ -281,7 +288,7 @@
     /* -- camera: walks around and rises as the story goes on ------------- */
     var camAngle  = lerp(-0.40, 0.95, ease(story));            // orbit offset
     var camHeight = lerp(0.75, 1.55, ease(story));
-    var dist      = lerp(6.10, 6.90, ease(story));
+    var dist      = lerp(6.10, 6.90, ease(story)) * fitScale();
 
     camAngleNow  = lerp(camAngleNow,  camAngle,  0.08);
     camHeightNow = lerp(camHeightNow, camHeight, 0.08);
