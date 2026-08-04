@@ -11,6 +11,7 @@ Open `index.html` for the index of all three.
 | `ice-tea.html` | Scroll-scrubbed Canvas 2D. A can frozen in ice shatters into 58 procedural glass shards, a card deck fans open in 3D, an aurora field, a warm parallax closer. |
 | `pagani.html` | Real 3D. A glTF model on a sticky canvas — swipe to spin it with inertia, scroll to walk the camera around and lift all 51 panels apart, then reassemble. |
 | `arena.html` | 3D with **no model file**. A loot crate hinges open on four panels and a rifle runs a full reload — all three.js primitives, ~15 KB of geometry instead of 2.5 MB of asset. |
+| `flux.html` | Raymarched GLSL. A chrome blob with **no geometry** — the shape is a distance function evaluated per pixel, so splitting it apart is two numbers changing, not a rig. |
 | `juice.html` | Hand-projected particles. 540 bits on a tilted ring, depth-sorted into two canvases so the juice orbits *around* the bottle instead of sitting on top of it. |
 
 ## Running them
@@ -101,6 +102,19 @@ so a reload sequence drives real objects rather than a baked animation.
 
 Watch the licence on "free" models — the popular Khronos `DamagedHelmet`, for one,
 carries a **CC BY-NC** component, so it cannot go on a commercial site.
+
+`flux.html` goes one step further and drops geometry altogether: the object is a signed
+distance function, and the surface is found by marching each pixel's ray until the
+distance hits zero. Two things make it look like metal rather than putty, and both are
+in `env()`:
+
+- what it reflects has **hard light/dark structure** — a narrow softbox on a near-black
+  room. A smooth gradient reflects back as matte plastic no matter how shiny the material
+- a **crisp horizon line**. That single hard edge reads as "mirror" more strongly than any
+  amount of specular
+
+Raymarching costs a full march per pixel, so pixels are the budget: the page renders at
+0.6× resolution with a 48-step march on phones, 0.85× and 84 steps on desktop.
 
 ## Vendored dependencies
 

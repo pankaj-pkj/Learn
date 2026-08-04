@@ -137,6 +137,24 @@ code{
   50%    { transform:translateY(-46px) rotate(28deg); opacity:1; }
 }
 
+.card__art--flux{ background:radial-gradient(70% 80% at 50% 50%, #12202e 0%, #070a10 62%, #04050a 100%); }
+.card__art--flux i{
+  left:50%; top:50%;
+  width:34%; aspect-ratio:1;
+  margin:-17% 0 0 -17%;
+  border-radius:50%;
+  background:
+    radial-gradient(closest-side at 42% 26%, #ffffff 0 16%, transparent 17%),
+    radial-gradient(closest-side at 50% 44%, #7db6e2 0 30%, transparent 31%),
+    linear-gradient(180deg,#20364a,#0a1119 62%,#1d1408);
+  animation:merge 6s var(--ease) infinite alternate;
+}
+.card__art--flux i:nth-child(2){ width:20%; margin:-10% 0 0 -10%; animation-delay:-3s; }
+@keyframes merge{
+  0%  { transform:translate(-26px,10px) scale(.86); }
+  100%{ transform:translate(30px,-12px) scale(1.06); }
+}
+
 .card__art--juice{ background:radial-gradient(90% 90% at 50% 50%, #4a0410 0%, #1b0308 60%, #0b0104 100%); }
 .card__art--juice i{
   left:50%; top:50%;

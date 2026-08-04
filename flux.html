@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flux — raymarched liquid metal</title>
+<meta name="description" content="A chrome blob with no geometry at all: the whole shape is a distance function marched on the GPU, split and merged by scroll.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/flux.css">
+</head>
+<body>
+
+<header class="bar">
+  <b>FLUX</b>
+  <a href="index.html">← All demos</a>
+</header>
+
+<div class="stage"><canvas id="gl"></canvas></div>
+<div class="veil" data-veil aria-hidden="true"></div>
+
+<main class="story">
+
+  <section class="beat beat--l">
+    <div class="copy" data-copy>
+      <p class="tag">No mesh · no model · no vertices</p>
+      <h1>Liquid<br><em>metal</em></h1>
+      <p>Is page par ek bhi triangle nahi hai. Poori shape ek formula hai — har pixel apne aap poochta hai "yahan se surface kitni door hai?" aur us hisaab se rang chunta hai.</p>
+    </div>
+  </section>
+
+  <section class="beat beat--r">
+    <div class="copy" data-copy>
+      <p class="tag">Signed distance field</p>
+      <h2>Ek <em>maths</em> ka aakaar</h2>
+      <p>Saat gole apne-apne raste par ghoomte hain. Unhe jodne wala <code>smin()</code> unhe milte waqt pighla deta hai — isliye do boond paas aakar ek ho jaati hain, takrati nahi.</p>
+      <div class="meter">
+        <div><span>Spread</span><i data-m="spread"></i><b data-v="spread">0.00</b></div>
+        <div><span>Blend</span><i data-m="blend"></i><b data-v="blend">0.00</b></div>
+        <div><span>Steps</span><i data-m="steps"></i><b data-v="steps">0</b></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="beat beat--l">
+    <div class="copy" data-copy>
+      <p class="tag">Scroll — bikharo</p>
+      <h2>Todo,<br>phir <em>jodo</em></h2>
+      <p>Scroll golon ko door karta hai. Ek hadd ke baad blend unhe pakad nahi paata aur ek chrome boond alag ho jaati hai — koi keyframe nahi, bas doori badalne ka natija.</p>
+    </div>
+  </section>
+
+  <section class="beat beat--c">
+    <div class="copy" data-copy>
+      <p class="tag">Mouse hilao</p>
+      <h2>Roshni <em>aapke</em> haath</h2>
+      <p>Reflection asli environment se nahi aa raha — wo bhi ek formula hai. Isliye poora page ek shader hai: koi texture nahi, koi image nahi, kuch download nahi hota.</p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="foot">
+  <p>Ek fullscreen quad, ek fragment shader. Baaki sab maths.</p>
+  <p><a href="index.html">← All demos</a></p>
+</footer>
+
+<script src="assets/vendor/three.min.js"></script>
+<script src="assets/js/flux.js"></script>
+</body>
+</html>
