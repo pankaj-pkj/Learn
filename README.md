@@ -12,6 +12,7 @@ Open `index.html` for the index of all three.
 | `pagani.html` | Real 3D. A glTF model on a sticky canvas — swipe to spin it with inertia, scroll to walk the camera around and lift all 51 panels apart, then reassemble. |
 | `arena.html` | 3D with **no model file**. A loot crate hinges open on four panels and a rifle runs a full reload — all three.js primitives, ~15 KB of geometry instead of 2.5 MB of asset. |
 | `flux.html` | Raymarched GLSL. A chrome blob with **no geometry** — the shape is a distance function evaluated per pixel, so splitting it apart is two numbers changing, not a rig. |
+| `mirror.html` | A reflection in **water you can disturb**. A height field stepped through the damped wave equation on the GPU; the pointer drops into it and the ripples spread, interfere and decay on their own. |
 | `juice.html` | Hand-projected particles. 540 bits on a tilted ring, depth-sorted into two canvases so the juice orbits *around* the bottle instead of sitting on top of it. |
 
 ## Running them
@@ -115,6 +116,32 @@ in `env()`:
 
 Raymarching costs a full march per pixel, so pixels are the budget: the page renders at
 0.6× resolution with a 48-step march on phones, 0.85× and 84 steps on desktop.
+
+## Water that is actually simulated
+
+Most "water" on the web is a noise texture being scrolled. It looks fine in a still and
+falls apart the moment you interact, because noise has no physics: ripples do not spread
+from where you touched, do not pass through each other, and do not stop.
+
+`mirror.html` steps a height field through the damped wave equation instead, on the GPU,
+once per frame:
+
+```glsl
+float next = (left + right + up + down) * 0.5 - previous;
+next *= 0.9915;                       // damping
+next -= force * smoothstep(radius, 0.0, distance(uv, pointer));
+```
+
+Two details make it work:
+
+- it needs the **previous two** states, so three render targets rotate roles each frame
+  (`prev`, `cur`, and the one being written)
+- the field goes negative, so the targets are `HalfFloatType` — a normal 8-bit texture
+  clips everything below zero and the waves flatten out
+
+The reflection is bent by the field's **gradient**, not its height. Height tells you where
+the surface is; the gradient tells you which way it is tilted, and tilt is what moves a
+reflection. Swap in your own photo with `IMAGE_URL` at the top of `assets/js/mirror.js`.
 
 ## Vendored dependencies
 

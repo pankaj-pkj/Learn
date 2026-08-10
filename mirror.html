@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mirror — a reflection you can disturb</title>
+<meta name="description" content="A reflection sitting in water that runs the real wave equation on the GPU: move the pointer and the ripples spread, interfere and die out on their own.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/mirror.css">
+</head>
+<body>
+
+<header class="bar">
+  <b>MIRROR</b>
+  <a href="index.html">← All demos</a>
+</header>
+
+<div class="stage">
+  <canvas id="gl"></canvas>
+
+  <div class="over">
+    <p class="client">Study: water surface</p>
+    <h1>Reflection,<br>disturbed</h1>
+    <p class="role">Role: GPU simulation / shader / interaction</p>
+    <p class="lede">Pointer hilao — lehrein wahan se failengi, aapas me takraayengi aur apne aap shaant ho jayengi. Click karo to bada chhinta padta hai.</p>
+    <a class="cta" href="#how">Kaise chalta hai</a>
+  </div>
+
+  <p class="hint">Move the pointer · click to splash</p>
+</div>
+
+<section class="notes" id="how">
+
+  <div class="copy" data-copy>
+    <h2>Ye noise nahi hai</h2>
+    <p>Zyadatar "paani" wale effects bas ek noise texture ko khiskate hain. Wo dikhne me chalta hai, par lehrein na failti hain, na takraati hain, na rukti hain. Yahan har frame ek asli <b>wave equation</b> chalti hai — GPU par, ek height field ke upar.</p>
+    <pre>next = (left + right + up + down) / 2 - previous;
+next *= 0.9915;   // damping</pre>
+  </div>
+
+  <div class="copy" data-copy>
+    <h2>Do buffer, badalte rehte hain</h2>
+    <p>Simulation ko pichhli <em>do</em> haalaton ki zarurat hoti hai, isliye teen render target hain jinke roles har frame ghoomte rehte hain — <code>prev</code>, <code>cur</code>, aur jisme likhna hai wo. Height field negative bhi jaata hai, isliye buffer <code>HalfFloatType</code> ka hai; normal 8-bit texture minus values kaat deta.</p>
+  </div>
+
+  <div class="copy" data-copy>
+    <h2>Reflection kaise mudta hai</h2>
+    <p>Paani ki height se seedha kuch nahi hota — jo matlab rakhta hai wo hai uska <b>gradient</b>, yaani dhalaan. Wahi surface ka jhukav hai, aur usi se reflection ke texture coordinates hilte hain. Distortion neeche jaakar badhta hai, kyunki door ka paani zyada tirchha dikhta hai.</p>
+  </div>
+
+  <div class="copy" data-copy>
+    <h2>Apni photo lagao</h2>
+    <p>Upar ki tasveer code se bani hai kyunki repo me koi image nahi thi. <code>assets/js/mirror.js</code> me sabse upar <code>IMAGE_URL</code> me apni photo ka path daal do — baaki kuch badalne ki zarurat nahi. Image same-origin honi chahiye, warna WebGL usse padh nahi paata.</p>
+  </div>
+
+</section>
+
+<footer class="foot">
+  <p>Ek height field, teen buffer, aur ek line ka physics.</p>
+  <p><a href="index.html">← All demos</a></p>
+</footer>
+
+<script src="assets/vendor/three.min.js"></script>
+<script src="assets/js/mirror.js"></script>
+</body>
+</html>
