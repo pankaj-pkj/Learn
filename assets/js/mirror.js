@@ -76,56 +76,69 @@
     x.lineCap = 'round';
     x.lineJoin = 'round';
 
-    // Roughly seven heads tall, which is what stops a stick figure reading as
-    // a scarecrow. Everything else hangs off these two points.
-    var sho = [512, 494], hip = [512, 676];
+    /* A limb is a tapered quad — wide at the joint, narrow at the end — with a
+       disc capping each end. Uniform round strokes read as a stick figure;
+       taper is most of what makes a silhouette look like a body. */
+    function limb(ax, ay, bx, by, wa, wb) {
+      var dx = bx - ax, dy = by - ay;
+      var L  = Math.hypot(dx, dy) || 1;
+      var nx = -dy / L, ny = dx / L;
+      x.beginPath();
+      x.moveTo(ax + nx * wa, ay + ny * wa);
+      x.lineTo(bx + nx * wb, by + ny * wb);
+      x.lineTo(bx - nx * wb, by - ny * wb);
+      x.lineTo(ax - nx * wa, ay - ny * wa);
+      x.closePath();
+      x.fill();
+      x.beginPath(); x.arc(ax, ay, wa, 0, Math.PI * 2); x.fill();
+      x.beginPath(); x.arc(bx, by, wb, 0, Math.PI * 2); x.fill();
+    }
 
-    x.beginPath();                             // head
-    x.arc(512, 438, 25, 0, Math.PI * 2);
+    // Legs first, then the coat over them, then arms on top — back to front.
+    limb(500, 654, 468, 762, 20, 14);          // front thigh
+    limb(466, 764, 452, 846, 17, 12);          // front shin
+    limb(452, 846, 414, 856, 12, 10);          // front boot
+    limb(518, 654, 550, 756, 20, 14);          // back thigh
+    limb(552, 758, 572, 844, 16, 12);          // back shin
+    limb(572, 844, 606, 854, 12, 10);          // back boot
+
+    /* The coat: shoulders down past the knee, flaring behind. Kept narrow —
+       an earlier version was so wide it swallowed the whole body. */
+    x.beginPath();
+    x.moveTo(486, 508);
+    x.lineTo(538, 508);
+    x.bezierCurveTo(556, 560, 566, 636, 564, 700);
+    x.bezierCurveTo(563, 736, 556, 766, 546, 790);
+    x.lineTo(524, 782);
+    x.bezierCurveTo(532, 742, 534, 700, 529, 664);
+    x.lineTo(496, 670);
+    x.bezierCurveTo(486, 638, 482, 566, 486, 508);
+    x.closePath();
     x.fill();
 
-    x.lineWidth = 15;                          // neck
+    limb(510, 474, 512, 510, 10, 25);          // neck into shoulders
+    limb(512, 510, 506, 658, 25, 18);          // torso under the coat
+
+    /* Hood — narrow, and tipped forward over the face. An earlier one was as
+       wide as the shoulders, which read as a mushroom rather than a head. */
     x.beginPath();
-    x.moveTo(512, 456); x.lineTo(sho[0], sho[1]);
-    x.stroke();
+    x.moveTo(492, 486);
+    x.bezierCurveTo(482, 452, 492, 422, 514, 420);
+    x.bezierCurveTo(534, 418, 544, 438, 542, 460);
+    x.bezierCurveTo(540, 480, 528, 494, 512, 496);
+    x.closePath();
+    x.fill();
 
-    x.lineWidth = 44;                          // torso, tapering to the hips
-    x.beginPath();
-    x.moveTo(sho[0], sho[1]); x.lineTo(hip[0] - 4, hip[1]);
-    x.stroke();
+    // leading arm, reaching out and slightly down
+    limb(488, 518, 430, 558, 15, 11);
+    limb(428, 558, 370, 576, 13, 9);
 
-    x.lineWidth = 21;                          // leading arm, reaching forward
-    x.beginPath();
-    x.moveTo(sho[0] - 14, sho[1] + 8);
-    x.lineTo(452, 560);
-    x.lineTo(392, 578);
-    x.stroke();
+    // trailing arm, swung back behind the body
+    limb(536, 520, 578, 584, 14, 10);
+    limb(580, 584, 598, 652, 12, 9);
 
-    x.beginPath();                             // trailing arm, swung back
-    x.moveTo(sho[0] + 14, sho[1] + 8);
-    x.lineTo(566, 578);
-    x.lineTo(592, 648);
-    x.stroke();
-
-    x.lineWidth = 26;                          // front leg, mid-stride
-    x.beginPath();
-    x.moveTo(hip[0] - 6, hip[1]);
-    x.lineTo(474, 768);
-    x.lineTo(452, 852);
-    x.stroke();
-
-    x.beginPath();                             // back leg, pushing off
-    x.moveTo(hip[0] + 6, hip[1]);
-    x.lineTo(552, 764);
-    x.lineTo(572, 852);
-    x.stroke();
-
-    x.lineWidth = 17;                          // a coat tail trailing behind
-    x.beginPath();
-    x.moveTo(528, 546);
-    x.lineTo(572, 682);
-    x.lineTo(560, 776);
-    x.stroke();
+    // something long carried in the trailing hand
+    limb(598, 652, 578, 766, 5, 4);
     x.restore();
 
     // grain, so the flat gradients never band in the reflection
@@ -277,20 +290,55 @@
       '    float hu = texture2D(uWave, uv + vec2(0.0,  uTexel.y)).r;',
       '    vec2  grad = vec2(hr - hl, hu - hd);',
 
-      // a slow swell so the water is alive even when nobody touches it
-      '    float swell = sin(uv.x * 26.0 + uTime * 1.1) * 0.5',
-      '                + sin(uv.x * 61.0 - uTime * 0.7) * 0.25;',
+      /* The streaks are the whole look. They come from displacing the sample
+         HORIZONTALLY by an amount that changes fast as you move down — each
+         row slides a different way, so a bright column smears into a ribbon.
+         Low frequency near the waterline, tighter further down, the way real
+         chop foreshortens with distance. */
+      /* Perspective. Evenly spaced waves on a flat plane crowd together as
+         they recede, so the phase runs on 1/distance, not on screen position.
+         That single reciprocal gives dense ripples at the waterline opening
+         out towards the viewer — the thing that makes water look like water
+         rather than a wobbling texture. */
+      '    float q = 8.0 / (d + 0.030);',
 
-      '    vec2 disp = grad * 0.85 + vec2(0.0, swell * 0.0022);',
-      '    disp *= 0.35 + d * 1.25;',            // distortion grows with distance
+      '    float chop =',
+      '        sin(q * 0.55 - uTime * 2.30) * 0.55',
+      '      + sin(q * 1.20 + uTime * 1.40) * 0.34',
+      '      + sin(q * 2.40 - uTime * 3.30) * 0.20',
+      '      + sin(q * 0.30 + uv.x * 8.0 - uTime * 0.90) * 0.60',
+      '      + sin(q * 4.30 + uv.x * 3.0 + uTime * 4.10) * 0.11;',
 
-      '    vec2 s = vec2(uv.x, 1.0 - d * 0.92) + disp;',
+      // a much smaller vertical wobble — without it the streaks look like paper
+      '    float lift = sin(q * 0.85 + uv.x * 12.0 - uTime * 1.7) * 0.4',
+      '               + sin(q * 2.05 - uTime * 2.6) * 0.2;',
+
+      /* Right at the waterline the ripples are finer than a pixel, so drawing
+         them there is just aliasing. Fade them in over the first few percent —
+         which is also what the horizon does in real life. */
+      '    float near = smoothstep(0.0, 0.075, d);',
+
+      '    vec2 disp;',
+      /* The ambient chop has to stay legible near the waterline too, and the
+         pointer's contribution has to stay small enough not to smear it out —
+         a big smooth displacement swallows the fine streaks entirely. */
+      '    disp.x = chop * 0.030 * (0.22 + d * 1.20) * near + grad.x * 0.75;',
+      '    disp.y = lift * 0.0030 * (0.20 + d)       * near + grad.y * 0.40;',
+
+      /* Sampling less of the picture over more of the screen stretches the
+         reflection downward, which is what a shallow viewing angle does. */
+      '    vec2 s = vec2(uv.x, d * 0.55) + disp;',
       '    col = scene(s);',
 
-      // water is darker, cooler, and loses contrast with depth
-      '    col *= mix(0.86, 0.34, d);',
-      '    col  = mix(col, col * vec3(0.55, 0.78, 1.0), 0.55);',
-      '    col += vec3(0.30, 0.52, 0.70) * clamp(grad.y * 6.0, 0.0, 1.0) * 0.5;',
+      // deeper water is darker, cooler and lower contrast
+      '    float shade = mix(0.95, 0.30, d);',
+      '    col = (col - 0.5) * mix(1.10, 0.82, d) + 0.5;',   // hold contrast up top
+      '    col *= shade;',
+      '    col  = mix(col, col * vec3(0.52, 0.74, 1.0), 0.6);',
+
+      // the crest of each wave catches a little sky
+      '    col += vec3(0.24, 0.44, 0.62) * clamp(chop, 0.0, 1.0) * 0.13 * near * (1.0 - d);',
+      '    col += vec3(0.30, 0.52, 0.70) * clamp(grad.y * 5.0, 0.0, 1.0) * 0.45;',
       '  }',
 
       // a thin bright seam exactly on the waterline
