@@ -73,7 +73,7 @@
 
     var lp = ctx.createBiquadFilter();
     lp.type = 'lowpass';
-    lp.frequency.value = 420;
+    lp.frequency.value = 1100;
     lp.Q.value = 0.6;
     send(lp);
 
@@ -81,13 +81,17 @@
     var sweep = ctx.createOscillator();
     sweep.frequency.value = 0.035;               // one pass every ~29 seconds
     var sweepAmt = ctx.createGain();
-    sweepAmt.gain.value = 260;
+    sweepAmt.gain.value = 620;
     sweep.connect(sweepAmt);
     sweepAmt.connect(lp.frequency);
     sweep.start();
     this.voices.push(sweep);
 
-    var chord = [98.00, 146.83, 220.00];         // G2, D3, A3 — open, no third
+    /* An octave and a fifth up from where this started. The first version sat
+       on G2/D3/A3 and measured -48 dB at 20-120 Hz with nothing above 600 —
+       fine on studio monitors, inaudible on a laptop or a phone, which roll off
+       hard below a few hundred hertz. */
+    var chord = [196.00, 293.66, 440.00];        // G3, D4, A4 — open, no third
     var self = this;
 
     chord.forEach(function (f, i) {
@@ -98,7 +102,7 @@
         o.detune.value = cents;
 
         var g = ctx.createGain();
-        g.gain.value = (i === 0 ? 0.16 : 0.075);
+        g.gain.value = (i === 0 ? 0.20 : 0.115);
 
         // an independent slow tremolo per voice keeps them from phasing as one
         var lfo = ctx.createOscillator();
@@ -110,7 +114,18 @@
         lfo.start();
 
         o.connect(g); g.connect(lp); o.start();
-        self.voices.push(o, lfo);
+
+        // an octave up at low level: small speakers reproduce this, the
+        // fundamental they mostly cannot
+        var hi = ctx.createOscillator();
+        hi.type = 'sine';
+        hi.frequency.value = f * 2;
+        hi.detune.value = cents * 1.6;
+        var hg = ctx.createGain();
+        hg.gain.value = g.gain.value * 0.30;
+        hi.connect(hg); hg.connect(lp); hi.start();
+
+        self.voices.push(o, lfo, hi);
       });
     });
 
@@ -122,11 +137,11 @@
 
     var bp = ctx.createBiquadFilter();
     bp.type = 'bandpass';
-    bp.frequency.value = 1400;
-    bp.Q.value = 0.7;
+    bp.frequency.value = 2200;
+    bp.Q.value = 0.6;
 
     var ng = ctx.createGain();
-    ng.gain.value = 0.012;                       // barely there, on purpose
+    ng.gain.value = 0.030;                       // barely there, on purpose
 
     noise.connect(bp); bp.connect(ng); send(ng);
     noise.start();
@@ -144,7 +159,7 @@
 
       var g = ctx.createGain();
       g.gain.setValueAtTime(0, t);
-      g.gain.linearRampToValueAtTime(0.09, t + 0.03);
+      g.gain.linearRampToValueAtTime(0.17, t + 0.03);
       g.gain.exponentialRampToValueAtTime(0.0001, t + 4.2);
 
       o.connect(g); send(g);
@@ -162,7 +177,7 @@
     var t = this.ctx.currentTime;
     this.master.gain.cancelScheduledValues(t);
     this.master.gain.setValueAtTime(this.master.gain.value, t);
-    this.master.gain.linearRampToValueAtTime(0.16, t + 2.5);
+    this.master.gain.linearRampToValueAtTime(0.34, t + 2.5);
     this.playing = true;
   };
 
@@ -191,10 +206,20 @@
     function paint() {
       btn.setAttribute('aria-pressed', String(amb.playing));
       btn.classList.toggle('is-on', amb.playing);
-      btn.querySelector('[data-label]').textContent = amb.playing ? 'Sound on' : 'Sound off';
+      /* "Sound off" reads as a statement about the current state; "Play sound"
+         reads as the thing clicking it will do. */
+      btn.querySelector('[data-label]').textContent = amb.playing ? 'Sound on' : 'Play sound';
     }
 
-    btn.addEventListener('click', function () { amb.toggle(); paint(); });
+    btn.addEventListener('click', function () {
+      btn.classList.remove('is-new');
+      amb.toggle();
+      paint();
+    });
+
+    // draw the eye once, then stop pestering
+    btn.classList.add('is-new');
+    setTimeout(function () { btn.classList.remove('is-new'); }, 12000);
 
     // give the CPU back when the tab is not being looked at
     document.addEventListener('visibilitychange', function () {
