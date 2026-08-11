@@ -14,7 +14,7 @@
    uses it to bend the reflection's texture coordinates.
    ========================================================================== */
 
-(function () {
+(function (global) {
   'use strict';
 
   /* Your photo goes here; set it to null to fall back to the procedural scene
@@ -428,8 +428,38 @@
     drop.force = 0.055;
   }
 
-  stage.addEventListener('pointermove', place, { passive: true });
-  stage.addEventListener('pointerdown', function (e) { place(e); drop.force = 0.16; });
+  /* The same pointer that disturbs the water drives the water's sound, so the
+     two can never disagree about where or how hard it was touched. */
+  var lastAudio = 0, lastX = 0, lastY = 0;
+
+  function speak(e) {
+    if (!global.ambient) return;
+    var now = performance.now();
+    var dx = e.clientX - lastX, dy = e.clientY - lastY;
+    var speed = Math.sqrt(dx * dx + dy * dy);
+    lastX = e.clientX; lastY = e.clientY;
+
+    // Throttled, and only when the pointer is actually moving. Firing on every
+    // event turns a stream of soft swishes into a wall of noise.
+    if (now - lastAudio < 85 || speed < 3) return;
+    lastAudio = now;
+    global.ambient.swish(Math.min(1, speed / 55), drop.x);
+
+    // a stray droplet now and then, so a slow drag is not one flat sound
+    if (Math.random() < 0.13) global.ambient.drop(drop.x, 0.45);
+  }
+
+  stage.addEventListener('pointermove', function (e) {
+    place(e);
+    speak(e);
+  }, { passive: true });
+
+  stage.addEventListener('pointerdown', function (e) {
+    place(e);
+    drop.force = 0.16;
+    lastX = e.clientX; lastY = e.clientY;
+    if (global.ambient) global.ambient.drop(drop.x, 1);
+  });
 
   /* ======================================================================
      Loop
@@ -491,4 +521,4 @@
   window.addEventListener('resize', resize);
   resize();
   requestAnimationFrame(step);
-})();
+})(window);
