@@ -174,33 +174,44 @@ real site.
 
 ## Sound, also generated
 
-Every page has an ambient pad. There is no audio file — it is synthesised with Web Audio
-at run time: three chord tones as detuned oscillator pairs under a slowly sweeping
-lowpass, one soft bell every few seconds from a pentatonic set, filtered noise at the
-edge of hearing, and a reverb whose impulse response is generated rather than shipped.
-Nothing was recorded and nothing was downloaded, so there is no licence to honour, and
-it costs zero bytes.
+Every page has music, and it is different every time. There is no audio file — the key,
+the chord progression, the tempo, the pluck pattern and the pad's waveform are all drawn
+at random when the page loads, so two visits are never the same piece. The randomness is
+bounded: chords come from progressions that work and notes from one scale, so it wanders
+without ever going wrong.
 
-Adding it to a page is one line:
+The single thing that makes a handful of sparse notes feel like music is the **ping-pong
+delay** on a dotted eighth, with each echo a little darker than the last. Take it out and
+the same notes sound like scattered beeps.
+
+`mirror.html` also has water. A real droplet is not a "plop" — it is a short click as the
+surface parts, then a bubble trapped underneath ringing as it collapses, and a collapsing
+bubble sweeps *upward* in pitch. Get that backwards and it sounds like a cartoon. Dragging
+gives a swish whose brightness follows the pointer's speed. Both are driven by the same
+pointer that disturbs the water, so the sound and the ripples can never disagree about
+where you touched.
+
+Adding all of it to a page is one line:
 
 ```html
 <script src="assets/js/ambient.js"></script>
 ```
 
-It builds its own button and injects its own CSS, so there is no markup or stylesheet to
-edit.
+It builds its own button and injects its own CSS; pages that want the water sounds call
+`ambient.drop(x)` and `ambient.swish(speed, x)`.
 
-**It cannot play before the visitor interacts.** Chrome, Safari and Firefox all block
-that, and no flag on the page can opt out. What it does instead: try at load, and if the
-browser refuses, start at the first click, tap or keypress anywhere on the page. In
-practice nobody notices.
+**It cannot play before the visitor interacts.** Chrome, Safari and Firefox all block that
+and no flag on the page opts out. It tries at load, then starts at the first click, tap or
+keypress anywhere on the page.
 
-One detail that matters — a scroll or a wheel is *not* user activation in Chrome, only a
-click, tap or keypress is. The listeners are therefore kept until the context is really
-running; an earlier version dropped them on the first event, so anyone who scrolled
-before clicking got no sound at all, ever.
+One detail worth knowing: a scroll is *not* user activation in Chrome, only a click, tap or
+keypress is. The listeners are therefore kept until the context is really running — an
+earlier version dropped them on the first event of any kind, so anyone who scrolled before
+clicking got no sound at all, ever.
+
+Levels, measured at the destination: music sits near -26 dBFS with energy spread from
+120 Hz to 3 kHz, a click's droplet peaks around -19 dBFS. An early version put the chord an
+octave lower, where a laptop or phone speaker reproduces almost nothing — it measured -48 dB
+at 20-120 Hz and -84 dB by 600 Hz, which is why it seemed silent on anything but headphones.
 
 Muting is stored in `localStorage`, so a visitor who turns it off stays off across pages.
-Measured at the destination it sits near -20 dBFS with its energy between 120 Hz and
-2.4 kHz — where a laptop or phone speaker actually works. An earlier version sat an
-octave lower and was inaudible on anything but headphones.
