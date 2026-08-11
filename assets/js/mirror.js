@@ -166,12 +166,26 @@
 
   var photo;
   if (IMAGE_URL) {
-    photo = new THREE.TextureLoader().load(IMAGE_URL, function (t) {
-      if (t.image && t.image.height) {
-        imgAspect = t.image.width / t.image.height;
-        viewMat.uniforms.uImgAspect.value = imgAspect;
+    photo = new THREE.TextureLoader().load(
+      IMAGE_URL,
+      function (t) {
+        if (t.image && t.image.height) {
+          imgAspect = t.image.width / t.image.height;
+          viewMat.uniforms.uImgAspect.value = imgAspect;
+        }
+      },
+      undefined,
+      function () {
+        /* Opened straight off the disk, most likely: a browser treats one
+           file:// path as cross-origin to another and refuses to hand the
+           pixels to WebGL. Rather than show a blank page, fall back to the
+           scene that is drawn in code. */
+        photo.image = drawScene().image;
+        photo.needsUpdate = true;
+        imgAspect = 1;
+        viewMat.uniforms.uImgAspect.value = 1;
       }
-    });
+    );
   } else {
     photo = drawScene();
     imgAspect = 1;

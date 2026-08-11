@@ -174,15 +174,33 @@ real site.
 
 ## Sound, also generated
 
-`mirror.html` has an ambient pad behind a toggle. There is no audio file — every sound is
-synthesised with Web Audio at run time: three chord tones as detuned oscillator pairs
-under a slowly sweeping lowpass, one soft bell every few seconds from a pentatonic set,
-and filtered noise at the edge of hearing. Even the reverb's impulse response is
-generated (noise with an exponential decay) rather than shipped.
+Every page has an ambient pad. There is no audio file — it is synthesised with Web Audio
+at run time: three chord tones as detuned oscillator pairs under a slowly sweeping
+lowpass, one soft bell every few seconds from a pentatonic set, filtered noise at the
+edge of hearing, and a reverb whose impulse response is generated rather than shipped.
+Nothing was recorded and nothing was downloaded, so there is no licence to honour, and
+it costs zero bytes.
 
-That settles the licence question outright — nothing was recorded and nothing was
-downloaded — and it costs zero bytes. Measured at the destination it sits around
--37 dBFS RMS, which is about as quiet as a thing can be while still being there.
+Adding it to a page is one line:
 
-It never autoplays. Browsers block that anyway, and `assets/js/ambient.js` mounts itself
-on any page with a `[data-sound]` button, so it drops onto the other demos unchanged.
+```html
+<script src="assets/js/ambient.js"></script>
+```
+
+It builds its own button and injects its own CSS, so there is no markup or stylesheet to
+edit.
+
+**It cannot play before the visitor interacts.** Chrome, Safari and Firefox all block
+that, and no flag on the page can opt out. What it does instead: try at load, and if the
+browser refuses, start at the first click, tap or keypress anywhere on the page. In
+practice nobody notices.
+
+One detail that matters — a scroll or a wheel is *not* user activation in Chrome, only a
+click, tap or keypress is. The listeners are therefore kept until the context is really
+running; an earlier version dropped them on the first event, so anyone who scrolled
+before clicking got no sound at all, ever.
+
+Muting is stored in `localStorage`, so a visitor who turns it off stays off across pages.
+Measured at the destination it sits near -20 dBFS with its energy between 120 Hz and
+2.4 kHz — where a laptop or phone speaker actually works. An earlier version sat an
+octave lower and was inaudible on anything but headphones.
