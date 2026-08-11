@@ -17,9 +17,15 @@
 (function () {
   'use strict';
 
-  /* Drop your own photo in here and the procedural scene below is skipped.
-     Same-origin or CORS-enabled, otherwise WebGL refuses to sample it. */
-  var IMAGE_URL = null;
+  /* Your photo goes here; set it to null to fall back to the procedural scene
+     further down. Same-origin or CORS-enabled, otherwise WebGL refuses to
+     sample it.
+
+     One rule about what you feed in: the picture must be the DRY half only.
+     If it already has water in it — most hero shots of this kind do — crop it
+     off at the waterline first, otherwise this page reflects a reflection and
+     you get two sets of ripples fighting each other. */
+  var IMAGE_URL = 'assets/images/hall.jpg';
 
   var canvas  = document.getElementById('gl');
   var stage   = document.querySelector('.stage');
@@ -153,11 +159,22 @@
     return new THREE.CanvasTexture(c);
   }
 
+  /* The photo's aspect decides how it is fitted into the band above the water.
+     It is only known once the file has decoded, so it starts at a sane default
+     and the loader corrects it. */
+  var imgAspect = 0.74;
+
   var photo;
   if (IMAGE_URL) {
-    photo = new THREE.TextureLoader().load(IMAGE_URL);
+    photo = new THREE.TextureLoader().load(IMAGE_URL, function (t) {
+      if (t.image && t.image.height) {
+        imgAspect = t.image.width / t.image.height;
+        viewMat.uniforms.uImgAspect.value = imgAspect;
+      }
+    });
   } else {
     photo = drawScene();
+    imgAspect = 1;
   }
   photo.wrapS = photo.wrapT = THREE.ClampToEdgeWrapping;
   photo.minFilter = photo.magFilter = THREE.LinearFilter;
@@ -251,7 +268,8 @@
       uTexel : { value: new THREE.Vector2(1 / SIM, 1 / SIM) },
       uRes   : { value: new THREE.Vector2(1, 1) },
       uTime  : { value: 0 },
-      uLine  : { value: 0.44 }                   // where the water starts
+      uLine  : { value: 0.44 },                  // where the water starts
+      uImgAspect: { value: imgAspect }
     },
     fragmentShader: [
       'precision highp float;',
@@ -262,10 +280,27 @@
       'uniform vec2  uRes;',
       'uniform float uTime;',
       'uniform float uLine;',
+      'uniform float uImgAspect;',
 
       'vec3 scene(vec2 s){',
       '  s = clamp(s, vec2(0.0), vec2(1.0));',
       '  return texture2D(uPhoto, s).rgb;',
+      '}',
+
+      /* Cover-fit. The photo is portrait and the band above the water usually
+         is not, so one axis has to be cropped rather than squashed. Returns how
+         much of the image's width and height stay visible.
+
+         The crop is anchored to the BOTTOM of the image, not the centre: the
+         image's last row has to land exactly on the waterline, otherwise the
+         reflection starts from a different part of the picture than the one it
+         is supposed to be mirroring. */
+      'vec2 coverFit(){',
+      '  float band = uRes.x / max(uRes.y * (1.0 - uLine), 1.0);',
+      '  vec2 s = vec2(1.0);',
+      '  if(band > uImgAspect) s.y = uImgAspect / band;',
+      '  else                  s.x = band / uImgAspect;',
+      '  return s;',
       '}',
 
       'void main(){',
@@ -273,11 +308,14 @@
       '  float W = uLine;',
       '  vec3 col;',
 
+      '  vec2 fit = coverFit();',
+      '  float u  = (uv.x - 0.5) * fit.x + 0.5;',
+
       '  if(uv.y >= W){',
       /* Above the waterline: the picture, filling the upper band. v runs 0 at
          the waterline so the reflection below joins it seamlessly — the two
          halves have to meet at the same row of the image. */
-      '    col = scene(vec2(uv.x, (uv.y - W) / (1.0 - W)));',
+      '    col = scene(vec2(u, (uv.y - W) / (1.0 - W) * fit.y));',
       '  } else {',
       // below: the same picture mirrored, then bent by the water
       '    float d = (W - uv.y) / W;',            // 0 at the line, 1 at the bottom
@@ -327,7 +365,7 @@
 
       /* Sampling less of the picture over more of the screen stretches the
          reflection downward, which is what a shallow viewing angle does. */
-      '    vec2 s = vec2(uv.x, d * 0.55) + disp;',
+      '    vec2 s = vec2(u, d * 0.55 * fit.y) + disp;',
       '    col = scene(s);',
 
       // deeper water is darker, cooler and lower contrast

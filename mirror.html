@@ -51,8 +51,14 @@ next *= 0.9915;   // damping</pre>
   </div>
 
   <div class="copy" data-copy>
-    <h2>Apni photo lagao</h2>
-    <p>Upar ki tasveer code se bani hai kyunki repo me koi image nahi thi. <code>assets/js/mirror.js</code> me sabse upar <code>IMAGE_URL</code> me apni photo ka path daal do — baaki kuch badalne ki zarurat nahi. Image same-origin honi chahiye, warna WebGL usse padh nahi paata.</p>
+    <h2>Photo badalna ho to</h2>
+    <p><code>assets/js/mirror.js</code> me sabse upar <code>IMAGE_URL</code> badal do — bas. Image same-origin honi chahiye, warna WebGL usse padh nahi paata. <code>null</code> kar doge to neeche wala procedural scene chal jayega.</p>
+    <p><b>Ek shart:</b> photo me paani <em>nahi</em> hona chahiye. Aise zyadatar hero shots me reflection pehle se baked hota hai — use waterline par kaat do, warna ye page ek reflection ka reflection banata hai aur do alag lehrein aapas me ladti hain.</p>
+  </div>
+
+  <div class="copy" data-copy>
+    <h2>Portrait photo, wide screen</h2>
+    <p>Yahan lagi photo portrait hai, aur paani ke upar wali patti chaudi. Seedha khinch dete to figure squash ho jaata, aur cover karte to sirf taangein bachti. Isliye photo ke dono taraf ki <b>andheri deewar chaudai me badha di gayi hai</b> — kinare ka rang le kar, halki grain aur vignette ke saath. Us hisse me dekhne layak kuch hai hi nahi, isliye wo pakda nahi jaata.</p>
   </div>
 
 </section>

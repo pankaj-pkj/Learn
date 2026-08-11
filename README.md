@@ -141,7 +141,18 @@ Two details make it work:
 
 The reflection is bent by the field's **gradient**, not its height. Height tells you where
 the surface is; the gradient tells you which way it is tilted, and tilt is what moves a
-reflection. Swap in your own photo with `IMAGE_URL` at the top of `assets/js/mirror.js`.
+reflection.
+
+Swap the photo with `IMAGE_URL` at the top of `assets/js/mirror.js`. Two things to know
+before you do:
+
+- **The photo must be the dry half only.** Hero shots of this kind usually ship with the
+  water already rendered in; crop it off at the waterline, or the page reflects a
+  reflection and two sets of ripples fight each other.
+- **A portrait photo will not fill a landscape band.** Stretching it squashes the subject
+  and cover-fitting it crops everything but the bottom. The one here has its dark side
+  walls extended outward instead — edge colour, a little grain, a vignette. There is
+  nothing to look at out there, so nobody notices.
 
 ## Vendored dependencies
 
