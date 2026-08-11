@@ -311,22 +311,34 @@
       '  vec2 fit = coverFit();',
       '  float u  = (uv.x - 0.5) * fit.x + 0.5;',
 
+      /* The height field covers the whole viewport, not just the water, so the
+         disturbance is read once here and used on both sides of the line. Below
+         it bends a reflection; above it bends the picture itself, which is what
+         makes the figure melt when you drag across it. */
+      '  float hl = texture2D(uWave, uv + vec2(-uTexel.x, 0.0)).r;',
+      '  float hr = texture2D(uWave, uv + vec2( uTexel.x, 0.0)).r;',
+      '  float hd = texture2D(uWave, uv + vec2(0.0, -uTexel.y)).r;',
+      '  float hu = texture2D(uWave, uv + vec2(0.0,  uTexel.y)).r;',
+      '  vec2  grad = vec2(hr - hl, hu - hd);',
+      '  float h    = texture2D(uWave, uv).r;',
+
       '  if(uv.y >= W){',
       /* Above the waterline: the picture, filling the upper band. v runs 0 at
          the waterline so the reflection below joins it seamlessly — the two
          halves have to meet at the same row of the image. */
-      '    col = scene(vec2(u, (uv.y - W) / (1.0 - W) * fit.y));',
+      '    vec2 s = vec2(u, (uv.y - W) / (1.0 - W) * fit.y);',
+
+      /* Dry, so no chop — only what the pointer put there. It is pushed harder
+         than the water because there is no ambient ripple to ride on, and the
+         picture has to visibly move to read as liquid. */
+      '    s += grad * 2.6;',
+      '    col = scene(s);',
+
+      // a highlight along the disturbance, so it reads on the dark walls too
+      '    col += vec3(0.24, 0.46, 0.62) * clamp(abs(h) * 3.2, 0.0, 1.0) * 0.45;',
       '  } else {',
       // below: the same picture mirrored, then bent by the water
       '    float d = (W - uv.y) / W;',            // 0 at the line, 1 at the bottom
-
-      // the height field's gradient is the surface slope, which is what
-      // actually displaces a reflection
-      '    float hl = texture2D(uWave, uv + vec2(-uTexel.x, 0.0)).r;',
-      '    float hr = texture2D(uWave, uv + vec2( uTexel.x, 0.0)).r;',
-      '    float hd = texture2D(uWave, uv + vec2(0.0, -uTexel.y)).r;',
-      '    float hu = texture2D(uWave, uv + vec2(0.0,  uTexel.y)).r;',
-      '    vec2  grad = vec2(hr - hl, hu - hd);',
 
       /* The streaks are the whole look. They come from displacing the sample
          HORIZONTALLY by an amount that changes fast as you move down — each
@@ -365,8 +377,7 @@
 
       /* Sampling less of the picture over more of the screen stretches the
          reflection downward, which is what a shallow viewing angle does. */
-      '    vec2 s = vec2(u, d * 0.55 * fit.y) + disp;',
-      '    col = scene(s);',
+      '    col = scene(vec2(u, d * 0.55 * fit.y) + disp);',
 
       // deeper water is darker, cooler and lower contrast
       '    float shade = mix(0.95, 0.30, d);',
