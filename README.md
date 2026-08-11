@@ -143,6 +143,10 @@ The reflection is bent by the field's **gradient**, not its height. Height tells
 the surface is; the gradient tells you which way it is tilted, and tilt is what moves a
 reflection.
 
+The field covers the whole viewport, not just the water, so the same disturbance is read
+on both sides of the line: below it bends a reflection, above it bends the photograph
+itself — which is what makes the figure melt when you drag across it.
+
 Swap the photo with `IMAGE_URL` at the top of `assets/js/mirror.js`. Two things to know
 before you do:
 
@@ -167,3 +171,18 @@ still carries its original badges. The page around it is a fictional marque ("As
 and so are "ZOI" and "RAW Pressery", deliberately: these are technique studies, not
 copies of anyone's brand. Swap the model and the names before any of this goes near a
 real site.
+
+## Sound, also generated
+
+`mirror.html` has an ambient pad behind a toggle. There is no audio file — every sound is
+synthesised with Web Audio at run time: three chord tones as detuned oscillator pairs
+under a slowly sweeping lowpass, one soft bell every few seconds from a pentatonic set,
+and filtered noise at the edge of hearing. Even the reverb's impulse response is
+generated (noise with an exponential decay) rather than shipped.
+
+That settles the licence question outright — nothing was recorded and nothing was
+downloaded — and it costs zero bytes. Measured at the destination it sits around
+-37 dBFS RMS, which is about as quiet as a thing can be while still being there.
+
+It never autoplays. Browsers block that anyway, and `assets/js/ambient.js` mounts itself
+on any page with a `[data-sound]` button, so it drops onto the other demos unchanged.
